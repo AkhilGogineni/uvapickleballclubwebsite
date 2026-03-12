@@ -59,6 +59,7 @@
       <a href="{% url 'cio_profile' %}">CIO Profile</a>
       <a href="{% url 'admin_profile' %}">Admin Profile</a>
       {% if user.is_authenticated %}
+      <span class="signed-in-text">Signed in as {{ user.email }}</span>
       <form action="{% url 'logout' %}" method="post" style="display:inline;">
           {% csrf_token %}
           <button type="submit" class="logout-btn">Logout</button>

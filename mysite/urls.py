@@ -36,5 +36,7 @@ urlpatterns = [
     #default Django admin
     path("admin/", admin.site.urls),
 
+    path('accounts/', include('allauth.urls')),
+
     
 ]
