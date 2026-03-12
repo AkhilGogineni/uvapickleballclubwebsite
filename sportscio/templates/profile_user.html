@@ -1,0 +1,16 @@
+<h1>Welcome, {{ username }}!</h1>
+<p>User type: {{ user_type }}</p>
+
+<h2>Announcements</h2>
+<ul>
+    {% for a in announcements %}
+    <li>{{ a }}</li>
+    {% endfor %}
+</ul>
+
+<h2>Schedule</h2>
+<ul>
+    {% for item in schedule %}
+    <li>{{ item.day }}: {{ item.event }} at {{ item.time }}</li>
+    {% endfor %}
+</ul>

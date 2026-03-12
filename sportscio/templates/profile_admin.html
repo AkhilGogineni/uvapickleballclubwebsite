@@ -1,0 +1,10 @@
+<h1>Admin Profile</h1>
+<p>Username: {{ username }}</p>
+<p>Type: {{ user_type }}</p>
+<p>Email: {{ email }}</p>
+<h2>All Users</h2>
+<ul>
+  {% for u in all_users %}
+  <li>{{ u }}</li>
+  {% endfor %}
+</ul>

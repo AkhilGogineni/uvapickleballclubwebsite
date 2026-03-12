@@ -1,0 +1,10 @@
+<h1>CIO Profile</h1>
+<p>Username: {{ username }}</p>
+<p>Type: {{ user_type }}</p>
+<p>Email: {{ email }}</p>
+<h2>Applications</h2>
+<ul>
+  {% for app in applications %}
+  <li>{{ app }}</li>
+  {% endfor %}
+</ul>
