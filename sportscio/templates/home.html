@@ -48,22 +48,26 @@
         }
     </style>
 </head>
-
 <body>
-
 <!-- Top Navigation -->
 <div class="navbar">
     <h2>CIO App</h2>
 
     <div class="nav-links">
-        <a href="/">Home</a>
-        <a href="/sportscio/user/">User Profile</a>
-        <a href="/sportscio/cio/">CIO Profile</a>
-        <a href="/sportscio/admin/">Admin Profile</a>
-        <a href="/login/">Login</a>
-    </div>
+      <a href="/">Home</a>
+      <a href="{% url 'user_profile' %}">User Profile</a>
+      <a href="{% url 'cio_profile' %}">CIO Profile</a>
+      <a href="{% url 'admin_profile' %}">Admin Profile</a>
+      {% if user.is_authenticated %}
+      <form action="{% url 'logout' %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="logout-btn">Logout</button>
+      </form>
+      {% else %}
+      <a href="{% url 'login' %}">Login</a>
+      {% endif %}
+  </div>
 </div>
-
 <!-- Main Scrollable Content -->
 <div class="content">
 
