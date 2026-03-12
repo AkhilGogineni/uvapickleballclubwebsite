@@ -49,3 +49,19 @@ def admin_profile_view(request, user=None):
         "all_users": ["alice", "bob", "charlie"],  # placeholder list
     }
     return render(request, "profile_admin.html", context)
+
+def home(request):
+    announcements = [
+        "Tryouts begin next Monday",
+        "Team meeting Friday at 6pm"
+    ]
+
+    schedule = [
+        {"day": "Monday", "event": "Practice", "time": "5:00 PM"},
+        {"day": "Wednesday", "event": "Scrimmage", "time": "6:30 PM"}
+    ]
+
+    return render(request, "home.html", {
+        "announcements": announcements,
+        "schedule": schedule
+    })

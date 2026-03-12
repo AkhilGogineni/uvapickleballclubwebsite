@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CIO App</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #1e3a5f;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            z-index: 1000;
+        }
+        .navbar h2 {
+            color: white;
+            margin-right: 30px;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+        .nav-links a:hover {
+            background-color: #2f5a8a;
+        }
+        /* Scrollable content area */
+        .content {
+            margin-top: 80px;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .card {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Top Navigation -->
+<div class="navbar">
+    <h2>CIO App</h2>
+
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/sportscio/user/">User Profile</a>
+        <a href="/sportscio/cio/">CIO Profile</a>
+        <a href="/sportscio/admin/">Admin Profile</a>
+        <a href="/login/">Login</a>
+    </div>
+</div>
+
+<!-- Main Scrollable Content -->
+<div class="content">
+
+    <div class="section">
+        <h1>Welcome!</h1>
+        <p>This platform manages sports club events, announcements, and scheduling.</p>
+    </div>
+    <div class="section">
+        <h2>Announcements</h2>
+        {% if announcements %}
+            {% for a in announcements %}
+                <div class="card">
+                    {{ a }}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No announcements yet.</p>
+        {% endif %}
+    </div>
+
+    <div class="section">
+        <h2>Upcoming Schedule</h2>
+
+        {% if schedule %}
+            {% for item in schedule %}
+                <div class="card">
+                    <strong>{{ item.day }}</strong> — {{ item.event }} at {{ item.time }}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>No scheduled events.</p>
+        {% endif %}
+    </div>
+
+</div>
+</body>
+</html>

@@ -19,8 +19,13 @@ from django.contrib.auth import views as auth_views
 from django.urls import path, include
 from django.contrib import admin
 
+from sportscio import views
+
 
 urlpatterns = [
+    # Home page for empty path
+    path("", views.home, name="home"),
+
     #Route for app
     path("sportscio/", include("sportscio.urls")),  # all sportscio URLs go under /sportscio/
 
