@@ -20,23 +20,33 @@ from django.urls import path, include
 from django.contrib import admin
 
 from sportscio import views
-
+from django.views.generic import RedirectView
 
 urlpatterns = [
-    # Home page for empty path
-    path("", views.home, name="home"),
-
-    #Route for app
-    path("sportscio/", include("sportscio.urls")),  # all sportscio URLs go under /sportscio/
-
-    # login/logout route
+    path("", RedirectView.as_view(url='/login/', permanent=False)),  # root → login
+    path("sportscio/", include("sportscio.urls")),
     path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
-
-    #default Django admin
     path("admin/", admin.site.urls),
-
     path('accounts/', include('allauth.urls')),
+]
+
+
+# urlpatterns = [
+#     # Home page for empty path
+#     path("", views.home, name="home"),
+
+#     #Route for app
+#     path("sportscio/", include("sportscio.urls")),  # all sportscio URLs go under /sportscio/
+
+#     # login/logout route
+#     path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"),
+#     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+
+#     #default Django admin
+#     path("admin/", admin.site.urls),
+
+#     path('accounts/', include('allauth.urls')),
 
     
-]
+# ]
