@@ -31,6 +31,8 @@ ALLOWED_HOSTS = ['swe-group8-6275098586a9.herokuapp.com', '0.0.0.0', '127.0.0.1'
 
 # Application definition
 
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
 SITE_ID=2
 
 INSTALLED_APPS = [
