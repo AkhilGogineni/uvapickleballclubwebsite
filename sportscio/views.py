@@ -1,6 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+
 
 #User (student)
+@login_required
 def user_profile_view(request, user=None):
     """
     Landing page for a regular club member.
@@ -30,6 +33,7 @@ def user_profile_view(request, user=None):
 
 
 #CIO admin
+@login_required
 def cio_profile_view(request, user=None):
     context = {
         "username": getattr(user, "username", "Demo CIO"),
@@ -41,6 +45,7 @@ def cio_profile_view(request, user=None):
 
 
 #Superuser
+@login_required
 def admin_profile_view(request, user=None):
     context = {
         "username": getattr(user, "username", "Admin"),
@@ -51,17 +56,32 @@ def admin_profile_view(request, user=None):
     return render(request, "profile_admin.html", context)
 
 def home(request):
-    announcements = [
-        "Tryouts begin next Monday",
-        "Team meeting Friday at 6pm"
-    ]
+    user = request.user
+    
+    if user.is_superuser:
+        return redirect('admin_profile')
+    
+    try:
+        profile = user.profile
+    except:
+        return redirect('login')
+    
+    if profile.user_type == 'exec':
+        return redirect('cio_profile')
+    else:
+        return redirect('user_profile')
+    
+    # announcements = [
+    #     "Tryouts begin next Monday",
+    #     "Team meeting Friday at 6pm"
+    # ]
 
-    schedule = [
-        {"day": "Monday", "event": "Practice", "time": "5:00 PM"},
-        {"day": "Wednesday", "event": "Scrimmage", "time": "6:30 PM"}
-    ]
+    # schedule = [
+    #     {"day": "Monday", "event": "Practice", "time": "5:00 PM"},
+    #     {"day": "Wednesday", "event": "Scrimmage", "time": "6:30 PM"}
+    # ]
 
-    return render(request, "home.html", {
-        "announcements": announcements,
-        "schedule": schedule
-    })
+    # return render(request, "home.html", {
+    #     "announcements": announcements,
+    #     "schedule": schedule
+    # })

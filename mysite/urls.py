@@ -22,8 +22,9 @@ from django.contrib import admin
 from sportscio import views
 from django.views.generic import RedirectView
 
+
 urlpatterns = [
-    path("", RedirectView.as_view(url='/login/', permanent=False)),  # root → login
+    path("", RedirectView.as_view(url='/login/', permanent=False)),  
     path("sportscio/", include("sportscio.urls")),
     path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
