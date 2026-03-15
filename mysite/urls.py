@@ -30,7 +30,8 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
     path("admin/", admin.site.urls),
     path('accounts/', include('allauth.urls')),
-]
+    path('messages/', views.messages_view, name='messages'),
+]   
 
 
 # urlpatterns = [

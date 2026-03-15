@@ -23,6 +23,9 @@ def home(request):
 def user_profile_view(request):
     return render(request, "profile_user.html")
 
+@login_required
+def messages_view(request):
+    return render(request, "messages.html")
 
 @login_required
 @user_passes_test(is_exec)

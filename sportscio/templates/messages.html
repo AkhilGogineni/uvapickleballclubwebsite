@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User Profile | SportsCIO</title>
+    <title>Messages | SportsCIO</title>
 
     <style>
         * {
@@ -43,9 +43,9 @@
             opacity: 0.95;
         }
 
-        .grid {
+        .messages-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 2fr;
             gap: 24px;
         }
 
@@ -62,51 +62,73 @@
             color: #1e3a5f;
         }
 
-        .account-info p {
-            margin: 10px 0;
-            line-height: 1.6;
-        }
-
-        .styled-list {
+        .conversation-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
 
-        .styled-list li {
+        .conversation-item {
             padding: 14px 16px;
+            margin-bottom: 12px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .conversation-item:hover {
+            background: #e5e7eb;
+        }
+
+        .message-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .message-item {
+            padding: 12px 16px;
             margin-bottom: 12px;
             background: #f8fafc;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
         }
 
-        
-        .btn {
-            display: inline-block;
-            background: white;
-            color: #1e3a5f;
-            padding: 24px;
-            border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            text-decoration: none;
-            text-align: center;
+        .message-sender {
             font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
-            min-height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            color: #1e3a5f;
+            margin-bottom: 6px;
         }
 
-        button:hover {
+        .message-text {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 24px;
+            padding: 12px 24px;
+            background: white;
+            color: #1e3a5f;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .back-btn:hover {
             background: #f8fafc;
             border-color: #1e3a5f;
         }
 
         @media (max-width: 800px) {
-            .grid {
+            .messages-container {
                 grid-template-columns: 1fr;
             }
         }
@@ -116,40 +138,39 @@
 
 <div class="page">
     <div class="header">
-        <h1>Welcome, {{ request.user.username }}!</h1>
-        <p>Stay updated with announcements, events, and your club schedule.</p>
+        <h1>Messages</h1>
+        <p>View and manage your conversations.</p>
     </div>
 
-    <div class="grid">
-        <div class="card account-info">
-            <h2>Account Information</h2>
-            <p><strong>User type:</strong> {{ request.user.profile.user_type }}</p>
-            <p><strong>Email:</strong> {{ request.user.email }}</p>
-        </div>
-
+    <div class="messages-container">
+        <!-- Conversations List -->
         <div class="card">
-            <h2>Announcements</h2>
-            <ul class="styled-list">
-                {% for a in announcements %}
-                <li>{{ a }}</li>
-                {% endfor %}
+            <h2>Conversations</h2>
+            <ul class="conversation-list">
+                <li class="conversation-item">User 1</li>
+                <li class="conversation-item">User 2</li>
+                <li class="conversation-item">User 3</li>
             </ul>
         </div>
 
-        <div class="card" style="grid-column: 1 / -1;">
-            <h2>Schedule</h2>
-            <ul class="styled-list">
-                {% for item in schedule %}
-                <li>{{ item.day }}: {{ item.event }} at {{ item.time }}</li>
-                {% endfor %}
+        <!-- Messages Display -->
+        <div class="card">
+            <h2>Messages</h2>
+            <ul class="message-list">
+                <li class="message-item">
+                    <div class="message-sender">User 1</div>
+                    <div class="message-text">This is a message...</div>
+                </li>
+                <li class="message-item">
+                    <div class="message-sender">User 1</div>
+                    <div class="message-text">Another message...</div>
+                </li>
             </ul>
         </div>
-
-        <a href="{% url 'messages' %}" class="btn" style="grid-column: 1 / -1;">Messages</a>
     </div>
+
+    <a href="{% url 'home' %}" class="back-btn">Back</a>
 </div>
-
-
 
 </body>
 </html>
