@@ -1,17 +1,127 @@
-<h1>Welcome, {{ request.user.username }}!</h1>
-<p>User type: {{ request.user.profile.user_type }}</p>
-<p>Email: {{ request.user.email }}</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile | SportsCIO</title>
 
-<h2>Announcements</h2>
-<ul>
-    {% for a in announcements %}
-    <li>{{ a }}</li>
-    {% endfor %}
-</ul>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
 
-<h2>Schedule</h2>
-<ul>
-    {% for item in schedule %}
-    <li>{{ item.day }}: {{ item.event }} at {{ item.time }}</li>
-    {% endfor %}
-</ul>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .page {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px 40px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a5f, #2f5a8a);
+            color: white;
+            padding: 32px;
+            border-radius: 18px;
+            box-shadow: 0 10px 28px rgba(30, 58, 95, 0.22);
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.3rem;
+        }
+
+        .header p {
+            margin: 6px 0 0 0;
+            font-size: 1rem;
+            opacity: 0.95;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: #1e3a5f;
+        }
+
+        .account-info p {
+            margin: 10px 0;
+            line-height: 1.6;
+        }
+
+        .styled-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .styled-list li {
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+        }
+
+        @media (max-width: 800px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page">
+    <div class="header">
+        <h1>Welcome, {{ request.user.username }}!</h1>
+        <p>Stay updated with announcements, events, and your club schedule.</p>
+    </div>
+
+    <div class="grid">
+        <div class="card account-info">
+            <h2>Account Information</h2>
+            <p><strong>User type:</strong> {{ request.user.profile.user_type }}</p>
+            <p><strong>Email:</strong> {{ request.user.email }}</p>
+        </div>
+
+        <div class="card">
+            <h2>Announcements</h2>
+            <ul class="styled-list">
+                {% for a in announcements %}
+                <li>{{ a }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card" style="grid-column: 1 / -1;">
+            <h2>Schedule</h2>
+            <ul class="styled-list">
+                {% for item in schedule %}
+                <li>{{ item.day }}: {{ item.event }} at {{ item.time }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
