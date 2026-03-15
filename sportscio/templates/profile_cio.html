@@ -1,7 +1,7 @@
-<h1>CIO Profile</h1>
-<p>Username: {{ username }}</p>
-<p>Type: {{ user_type }}</p>
-<p>Email: {{ email }}</p>
+<h1>CIO Executive Profile</h1>
+<p>Username: {{ request.user.username }}</p>
+<p>Type: {{ request.user.profile.user_type }}</p>
+<p>Email: {{ request.user.email }}</p>
 <h2>Applications</h2>
 <ul>
   {% for app in applications %}
