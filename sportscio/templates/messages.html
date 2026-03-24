@@ -45,7 +45,7 @@
 
         .messages-container {
             display: grid;
-            grid-template-columns: 1fr 2fr;
+            grid-template-columns: 1fr;
             gap: 24px;
         }
 
@@ -62,50 +62,124 @@
             color: #1e3a5f;
         }
 
-        .conversation-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .conversation-item {
-            padding: 14px 16px;
-            margin-bottom: 12px;
-            background: #f8fafc;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            cursor: pointer;
-        }
-
-        .conversation-item:hover {
-            background: #e5e7eb;
-        }
-
         .message-list {
             list-style: none;
             padding: 0;
-            margin: 0;
-            max-height: 400px;
+            margin: 0 0 20px 0;
+            max-height: 500px;
             overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px;
+            background: #f8fafc;
         }
 
         .message-item {
             padding: 12px 16px;
             margin-bottom: 12px;
-            background: #f8fafc;
+            background: white;
             border: 1px solid #e5e7eb;
             border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .message-item.own {
+            background: #e0e7ff;
+            margin-left: 20px;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
         }
 
         .message-sender {
             font-weight: 600;
             color: #1e3a5f;
-            margin-bottom: 6px;
+        }
+
+        .message-timestamp {
+            font-size: 0.8rem;
+            color: #9ca3af;
         }
 
         .message-text {
             color: #6b7280;
             font-size: 0.95rem;
+            word-wrap: break-word;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+        }
+
+        .input-area textarea {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 0.95rem;
+            resize: none;
+            min-height: 50px;
+        }
+
+        .input-area textarea:focus {
+            outline: none;
+            border-color: #2f5a8a;
+            box-shadow: 0 0 0 3px rgba(47, 90, 138, 0.1);
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: #2f5a8a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            height: 50px;
+            align-self: flex-end;
+        }
+
+        .send-btn:hover {
+            background: #1e3a5f;
+        }
+
+        .send-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .status {
+            text-align: center;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
         }
 
         .back-btn {
@@ -127,10 +201,27 @@
             border-color: #1e3a5f;
         }
 
-        @media (max-width: 800px) {
-            .messages-container {
-                grid-template-columns: 1fr;
-            }
+        .connection-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        .connection-indicator.connected {
+            background: #10b981;
+        }
+
+        .connection-indicator.disconnected {
+            background: #ef4444;
+            animation: none;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
     </style>
 </head>
@@ -138,39 +229,164 @@
 
 <div class="page">
     <div class="header">
-        <h1>Messages</h1>
-        <p>View and manage your conversations.</p>
+        <h1>Messages <span class="connection-indicator disconnected" id="connection-indicator"></span></h1>
+        <p>Real-time messaging with persistent storage</p>
     </div>
 
     <div class="messages-container">
-        <!-- Conversations List -->
         <div class="card">
-            <h2>Conversations</h2>
-            <ul class="conversation-list">
-                <li class="conversation-item">User 1</li>
-                <li class="conversation-item">User 2</li>
-                <li class="conversation-item">User 3</li>
+            <h2>General Chat</h2>
+            
+            <div class="status" id="status-message"></div>
+            
+            <ul class="message-list" id="message-list">
+                {% for message in messages %}
+                <li class="message-item {% if message.sender == user %}own{% endif %}">
+                    <div class="message-header">
+                        <span class="message-sender">{{ message.sender.get_full_name|default:message.sender.username }}</span>
+                        <span class="message-timestamp">{{ message.timestamp|date:"M d, Y g:i A" }}</span>
+                    </div>
+                    <div class="message-text">{{ message.content }}</div>
+                </li>
+                {% empty %}
+                <li style="text-align: center; color: #9ca3af; padding: 40px 20px;">No messages yet. Start the conversation!</li>
+                {% endfor %}
             </ul>
-        </div>
 
-        <!-- Messages Display -->
-        <div class="card">
-            <h2>Messages</h2>
-            <ul class="message-list">
-                <li class="message-item">
-                    <div class="message-sender">User 1</div>
-                    <div class="message-text">This is a message...</div>
-                </li>
-                <li class="message-item">
-                    <div class="message-sender">User 1</div>
-                    <div class="message-text">Another message...</div>
-                </li>
-            </ul>
+            <div class="input-area">
+                <textarea id="message-input" placeholder="Type your message here..." maxlength="500"></textarea>
+                <button class="send-btn" id="send-btn" onclick="sendMessage()">Send</button>
+            </div>
         </div>
     </div>
 
     <a href="{% url 'home' %}" class="back-btn">Back</a>
 </div>
+
+<script>
+    const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = `${wsScheme}://${window.location.host}/ws/chat/general/`;
+    const currentUserId = {{ user.id }};
+    
+    console.log('Attempting WebSocket connection to:', wsUrl);
+    console.log('Current user ID:', currentUserId);
+    
+    const chatSocket = new WebSocket(wsUrl);
+    const messageInput = document.getElementById('message-input');
+    const sendBtn = document.getElementById('send-btn');
+    const messageList = document.getElementById('message-list');
+    const statusMessage = document.getElementById('status-message');
+    const connectionIndicator = document.getElementById('connection-indicator');
+
+    chatSocket.onopen = function(e) {
+        console.log('WebSocket connection established');
+        connectionIndicator.className = 'connection-indicator connected';
+        updateStatus('Connected', 'success');
+        
+        const placeholder = messageList.querySelector('li[style*="text-align"]');
+        if (placeholder) placeholder.remove();
+    };
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        
+        if (data.type === 'chat_message') {
+            const messageItem = document.createElement('li');
+            messageItem.className = data.user_id === currentUserId ? 'message-item own' : 'message-item';
+            
+            const date = new Date(data.timestamp);
+            const formattedTime = date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            messageItem.innerHTML = `
+                <div class="message-header">
+                    <span class="message-sender">${escapeHtml(data.username)}</span>
+                    <span class="message-timestamp">${formattedTime}</span>
+                </div>
+                <div class="message-text">${escapeHtml(data.message)}</div>
+            `;
+            
+            messageList.appendChild(messageItem);
+            messageList.scrollTop = messageList.scrollHeight;
+        }
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('WebSocket closed unexpectedly', e);
+        connectionIndicator.className = 'connection-indicator disconnected';
+        updateStatus('Disconnected. Attempting to reconnect...', 'error');
+        
+        setTimeout(function() {
+            location.reload();
+        }, 3000);
+    };
+
+    chatSocket.onerror = function(error) {
+        console.error('WebSocket error:', error);
+        connectionIndicator.className = 'connection-indicator disconnected';
+        updateStatus('Connection error: Check browser console', 'error');
+    };
+
+    function sendMessage() {
+        const message = messageInput.value.trim();
+        
+        if (message === '') {
+            updateStatus('Message cannot be empty', 'error');
+            return;
+        }
+
+        if (!chatSocket || chatSocket.readyState !== WebSocket.OPEN) {
+            updateStatus('Not connected to server', 'error');
+            return;
+        }
+
+        chatSocket.send(JSON.stringify({
+            'message': message
+        }));
+
+        messageInput.value = '';
+        messageInput.focus();
+    }
+
+    function updateStatus(message, type) {
+        statusMessage.textContent = message;
+        statusMessage.className = `status show ${type}`;
+        
+        if (type === 'success') {
+            setTimeout(() => {
+                statusMessage.className = 'status';
+            }, 3000);
+        }
+    }
+
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return text.replace(/[&<>"']/g, m => map[m]);
+    }
+
+    // Allow Enter to send message (Shift+Enter for new line)
+    messageInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+
+    // Auto-scroll to bottom
+    messageList.scrollTop = messageList.scrollHeight;
+</script>
 
 </body>
 </html>

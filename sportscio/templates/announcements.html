@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Announcements</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+        }
+
+        {% if user.is_superuser %}
+        .admin-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .admin-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-submit {
+            background: #667eea;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+
+        .btn-submit:hover {
+            background: #5568d3;
+        }
+
+        .btn-submit:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        {% endif %}
+
+        .announcements-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .announcements-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .announcement-card {
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: #f9f9f9;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .announcement-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .announcement-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .announcement-card p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .announcement-meta {
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .announcement-author {
+            font-weight: 500;
+            color: #667eea;
+        }
+
+        .no-announcements {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'home' %}" class="back-btn">← Back to Home</a>
+
+        <div class="header">
+            <h1>📢 Announcements Board</h1>
+            <p>Stay updated with the latest announcements from the admin team</p>
+        </div>
+
+        {% if user.is_superuser %}
+        <div class="admin-section">
+            <h2>Create New Announcement</h2>
+            <div id="message" style="display: none;"></div>
+            <form id="announcement-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="title">Title *</label>
+                    <input type="text" id="title" name="title" required placeholder="Enter announcement title">
+                </div>
+                <div class="form-group">
+                    <label for="content">Content *</label>
+                    <textarea id="content" name="content" required placeholder="Enter announcement content"></textarea>
+                </div>
+                <button type="submit" class="btn-submit">Publish Announcement</button>
+            </form>
+        </div>
+        {% endif %}
+
+        <div class="announcements-section">
+            <h2>Current Announcements</h2>
+            <div id="announcements-list">
+                {% if announcements %}
+                    {% for announcement in announcements %}
+                    <div class="announcement-card">
+                        <h3>{{ announcement.title }}</h3>
+                        <p>{{ announcement.content }}</p>
+                        <div class="announcement-meta">
+                            <span class="announcement-author">By {{ announcement.author.get_full_name|default:announcement.author.username }}</span>
+                            <span>{{ announcement.created_at|date:"M d, Y \a\t g:i A" }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="no-announcements">
+                        <p>No announcements yet. Check back soon!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const announcementSocket = new WebSocket(`${wsScheme}://${window.location.host}/ws/announcements/`);
+
+        announcementSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if (data.type === 'announcement') {
+                prependAnnouncement(data);
+            }
+        };
+
+        announcementSocket.onerror = function(error) {
+            console.error('WebSocket error:', error);
+        };
+
+        function prependAnnouncement(data) {
+            const announcementsList = document.getElementById('announcements-list');
+            const noAnnouncementsMsg = announcementsList.querySelector('.no-announcements');
+            
+            if (noAnnouncementsMsg) {
+                noAnnouncementsMsg.remove();
+            }
+
+            const date = new Date(data.created_at);
+            const formattedDate = date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+
+            const card = document.createElement('div');
+            card.className = 'announcement-card';
+            card.innerHTML = `
+                <h3>${escapeHtml(data.title)}</h3>
+                <p>${escapeHtml(data.content)}</p>
+                <div class="announcement-meta">
+                    <span class="announcement-author">By ${escapeHtml(data.author)}</span>
+                    <span>${formattedDate}</span>
+                </div>
+            `;
+            announcementsList.insertBefore(card, announcementsList.firstChild);
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        {% if user.is_superuser %}
+        document.getElementById('announcement-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const messageDiv = document.getElementById('message');
+
+            fetch('{% url "create_announcement" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                },
+                body: JSON.stringify({ title, content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    messageDiv.className = 'alert alert-error';
+                    messageDiv.textContent = data.error;
+                } else {
+                    messageDiv.className = 'alert alert-success';
+                    messageDiv.textContent = 'Announcement published successfully!';
+                    document.getElementById('announcement-form').reset();
+                    
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 5000);
+                }
+                messageDiv.style.display = 'block';
+            })
+            .catch(error => {
+                messageDiv.className = 'alert alert-error';
+                messageDiv.textContent = 'Error creating announcement';
+                messageDiv.style.display = 'block';
+                console.error('Error:', error);
+            });
+        });
+        {% endif %}
+    </script>
+</body>
+</html>
