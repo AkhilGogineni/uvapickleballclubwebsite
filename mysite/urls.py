@@ -22,12 +22,12 @@ from django.contrib import admin
 from sportscio import views
 from django.views.generic import RedirectView
 
-
+#Project Level Url Patterns. Django will look here first
 urlpatterns = [
-    path("", RedirectView.as_view(url='/login/', permanent=False)),  
-    path("sportscio/", include("sportscio.urls")),
-    path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"),
-    path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+    path("", RedirectView.as_view(url='/login/', permanent=False)), #default page 
+    path("sportscio/", include("sportscio.urls")), #include sportscio app urls
+    path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"), #uses built in django login view with our template
+    path("logout/", auth_views.LogoutView.as_view(), name="logout"),#uses built in django logout view
     path("admin/", admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('messages/', views.messages_view, name='messages'),
