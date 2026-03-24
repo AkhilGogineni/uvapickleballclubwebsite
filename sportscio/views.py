@@ -14,7 +14,7 @@ def home(request):
         return redirect("admin_profile")
 
     if hasattr(user, "profile") and user.profile.user_type == "exec":
-        return redirect("cio_profile")
+        return redirect("exec_profile")
 
     return redirect("user_profile")
 
@@ -29,8 +29,8 @@ def messages_view(request):
 
 @login_required
 @user_passes_test(is_exec)
-def cio_profile_view(request):
-    return render(request, "profile_cio.html")
+def exec_profile_view(request):
+    return render(request, "profile_exec.html")
 
 
 @login_required
