@@ -98,6 +98,13 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            box-shadow: 0 12px 28px rgba(30, 58, 95, 0.15);
+            transform: translateY(-2px);
+        }
         }
 
         button:hover {
@@ -146,6 +153,7 @@
         </div>
 
         <a href="{% url 'messages' %}" class="btn" style="grid-column: 1 / -1;">Messages</a>
+        <a href="{% url 'announcements' %}" class="btn" style="grid-column: 1 / -1;">Announcements</a>
     </div>
 </div>
 
