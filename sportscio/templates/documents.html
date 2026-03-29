@@ -1,7 +1,7 @@
 {% extends "base_app.html" %}
 {% block title %}Documents | SportsCIO{% endblock %}
 {% block page_heading %}Documents{% endblock %}
-{% block page_sub %}Club files are stored in Amazon S3 on Heroku — not on the app server.{% endblock %}
+{% block page_sub %}{% endblock %}
 {% block content %}
 {% if messages %}
 <ul style="list-style:none;padding:0;margin:0 0 16px;">
@@ -44,7 +44,7 @@
             {% endfor %}
         </ul>
         {% else %}
-        <p class="muted">No documents yet.{% if is_privileged %} Upload one above.{% else %} Check back when officers add files.{% endif %}</p>
+        <p class="muted">No documents yet.{% if is_privileged %} Upload one above, or register a file in Django admin → <strong>Club documents</strong>.{% else %} Check back when officers add files.{% endif %} Putting a file only in Amazon S3 does not create a row in this app, so it won’t show in the list.</p>
         {% endif %}
     </div>
 </div>
