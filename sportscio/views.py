@@ -20,6 +20,26 @@ def home(request):
 
 
 @login_required
+def whoami_view(request):
+    try:
+        profile = request.user.profile
+        role = profile.role
+    except Profile.DoesNotExist:
+        role = None
+    return JsonResponse(
+        {
+            "username": request.user.username,
+            "email": request.user.email,
+            "is_authenticated": request.user.is_authenticated,
+            "role": role,
+            "is_user_admin": is_user_admin(request.user),
+            "is_officer": is_officer(request.user),
+            "is_superuser": request.user.is_superuser,
+        }
+    )
+
+
+@login_required
 def dashboard_view(request):
     if is_user_admin(request.user):
         return redirect("user_role_admin")
