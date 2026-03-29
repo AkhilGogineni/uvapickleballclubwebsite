@@ -1,21 +1,51 @@
 {% extends "base_app.html" %}
 {% block title %}Documents | SportsCIO{% endblock %}
 {% block page_heading %}Documents{% endblock %}
-{% block page_sub %}Policies, forms, and shared files — stored in S3 in a future sprint.{% endblock %}
+{% block page_sub %}Club files are stored in Amazon S3 on Heroku — not on the app server.{% endblock %}
 {% block content %}
+{% if messages %}
+<ul style="list-style:none;padding:0;margin:0 0 16px;">
+    {% for message in messages %}
+    <li style="padding:10px 14px;border-radius:12px;margin-bottom:8px;background:rgba(159,216,203,0.35);">{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
 <div class="card-grid">
+    {% if is_privileged %}
     <div class="card">
-        <h2>Shared drive</h2>
-        <p class="muted">Upload and organize club documents here. This section is a styled placeholder until file uploads are wired to Amazon S3.</p>
-        {% if is_privileged %}
-        <button type="button" class="btn-primary" disabled style="opacity:0.65;cursor:not-allowed;">Add document (coming soon)</button>
-        {% else %}
-        <p class="muted">Officers will publish documents for all members.</p>
-        {% endif %}
+        <h2 style="margin-top:0;">Upload</h2>
+        <p class="muted">Officers and superusers can add files for members to download.</p>
+        <form method="post" enctype="multipart/form-data" action="{% url 'documents' %}">
+            {% csrf_token %}
+            <div class="field" style="margin-bottom:14px;">
+                <label for="doc-title" style="display:block;font-weight:600;margin-bottom:6px;">Title</label>
+                <input type="text" id="doc-title" name="title" required placeholder="e.g. Constitution 2026" maxlength="200"
+                       style="width:100%;max-width:400px;padding:12px 14px;border-radius:14px;border:1px solid rgba(81,118,100,0.35);font:inherit;">
+            </div>
+            <div class="field" style="margin-bottom:14px;">
+                <label for="doc-file" style="display:block;font-weight:600;margin-bottom:6px;">File</label>
+                <input type="file" id="doc-file" name="file" required style="font:inherit;">
+            </div>
+            <button type="submit" class="btn-primary">Upload</button>
+        </form>
     </div>
-    <div class="card">
-        <h2>Placeholder</h2>
-        <p class="muted">No files yet.</p>
+    {% endif %}
+    <div class="card" style="{% if is_privileged %}grid-column: 1 / -1;{% endif %}">
+        <h2 style="margin-top:0;">Library</h2>
+        {% if documents %}
+        <ul class="list-rows" style="list-style:none;padding:0;margin:0;">
+            {% for d in documents %}
+            <li style="padding:14px 0;border-bottom:1px solid rgba(202,207,214,0.7);">
+                <a href="{{ d.file.url }}" target="_blank" rel="noopener" style="font-weight:700;color:var(--c-forest);">{{ d.title }}</a>
+                <p class="muted" style="margin:6px 0 0;font-size:0.88rem;">
+                    Uploaded {{ d.created_at|date:"M j, Y" }} by {{ d.uploaded_by.get_full_name|default:d.uploaded_by.username }}
+                </p>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="muted">No documents yet.{% if is_privileged %} Upload one above.{% else %} Check back when officers add files.{% endif %}</p>
+        {% endif %}
     </div>
 </div>
 {% endblock %}

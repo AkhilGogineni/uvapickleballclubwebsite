@@ -58,7 +58,11 @@
             </div>
             <div class="top-bar-actions">
                 <a class="user-pill" href="{% url 'profile_settings' %}">
+                    {% if user_profile_obj and user_profile_obj.avatar %}
+                    <img class="avatar avatar-img" src="{{ user_profile_obj.avatar.url }}" alt="" width="36" height="36">
+                    {% else %}
                     <span class="avatar" aria-hidden="true">{% with n=user.get_full_name|default:user.username %}{{ n|slice:":1"|upper }}{% endwith %}</span>
+                    {% endif %}
                     <span>{{ user.get_full_name|default:user.username }}</span>
                 </a>
                 <form class="logout-form" action="{% url 'logout' %}" method="post">

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "storages",
     "sportscio.apps.SportscioConfig",
     "django.contrib.sites",
     'allauth',
@@ -157,6 +158,47 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = "static/"
+
+# User uploads (profile photos, documents). Use S3 on Heroku; local disk for dev.
+# Set on Heroku: USE_S3=1, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_STORAGE_BUCKET_NAME,
+# AWS_S3_REGION_NAME (e.g. us-east-1). Bucket should allow PutObject/GetObject for your app;
+# for public images/files, add a bucket policy on media/ or use signed URLs.
+USE_S3 = os.environ.get("USE_S3", "").lower() in ("1", "true", "yes")
+
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
+
+if USE_S3:
+    AWS_ACCESS_KEY_ID = os.environ["AWS_ACCESS_KEY_ID"]
+    AWS_SECRET_ACCESS_KEY = os.environ["AWS_SECRET_ACCESS_KEY"]
+    AWS_STORAGE_BUCKET_NAME = os.environ["AWS_STORAGE_BUCKET_NAME"]
+    AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "us-east-1")
+    AWS_S3_OBJECT_PARAMETERS = {
+        "CacheControl": "max-age=86400",
+    }
+    # New buckets often have ACLs disabled; use bucket policy for public reads instead.
+    AWS_DEFAULT_ACL = None
+    AWS_QUERYSTRING_AUTH = False
+    AWS_LOCATION = "media"
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+    domain = f"{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com"
+    MEDIA_URL = f"https://{domain}/{AWS_LOCATION}/"
+else:
+    STORAGES = {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
 
 
 LOGIN_URL = "/login/"

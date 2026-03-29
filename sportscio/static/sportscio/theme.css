@@ -149,6 +149,14 @@ body.theme-app {
   color: var(--c-ink);
   font-weight: 800;
   font-size: 0.85rem;
+  flex-shrink: 0;
+}
+
+.avatar-img {
+  display: block;
+  object-fit: cover;
+  padding: 0;
+  background: var(--c-mist);
 }
 
 .logout-form {

@@ -16,6 +16,12 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_MEMBER)
     birthday = models.DateField(null=True, blank=True)
+    avatar = models.ImageField(
+        upload_to="profiles/",
+        blank=True,
+        null=True,
+        help_text="Profile photo; stored in S3 in production.",
+    )
 
     def __str__(self):
         return f"{self.user.username} ({self.get_role_display()})"
@@ -51,6 +57,23 @@ class Announcement(models.Model):
     def is_author_admin(self):
         return self.author.is_superuser
     
+class ClubDocument(models.Model):
+    """Shared club files (policies, forms). Files live on S3 in production, not in Postgres."""
+
+    uploaded_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="club_documents"
+    )
+    title = models.CharField(max_length=200)
+    file = models.FileField(upload_to="documents/%Y/%m/")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return self.title
+
+
 class Event(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events')
     title = models.CharField(max_length=200)

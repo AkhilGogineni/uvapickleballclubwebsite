@@ -19,12 +19,24 @@
         color: var(--c-ink);
     }
     .field input[type="text"],
-    .field input[type="date"] {
+    .field input[type="date"],
+    .field input[type="file"] {
         width: 100%;
         padding: 12px 14px;
         border-radius: 14px;
         border: 1px solid rgba(81, 118, 100, 0.35);
         font: inherit;
+    }
+    .field input[type="file"] { padding: 10px; }
+    .avatar-preview {
+        width: 96px;
+        height: 96px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(81, 118, 100, 0.35);
+        display: block;
+        margin-bottom: 12px;
+        background: var(--c-mist);
     }
     .field .hint { font-size: 0.82rem; color: #6b7a72; margin-top: 6px; }
     .readonly-block {
@@ -59,8 +71,16 @@
     <div class="card">
         <h2 style="margin-top:0;">Display name</h2>
         <p class="muted" style="margin-top:0;">Shown in the header, member list, and messaging.</p>
-        <form method="post" action="{% url 'profile_settings' %}">
+        <form method="post" action="{% url 'profile_settings' %}" enctype="multipart/form-data">
             {% csrf_token %}
+            {% if user.profile.avatar %}
+            <img class="avatar-preview" src="{{ user.profile.avatar.url }}" alt="Current profile photo">
+            {% endif %}
+            <div class="field">
+                <label for="avatar">Profile photo</label>
+                <input type="file" id="avatar" name="avatar" accept="image/*">
+                <p class="hint">JPEG or PNG, up to 2MB. Stored on Amazon S3 in production.</p>
+            </div>
             <div class="field">
                 <label for="first_name">First name</label>
                 <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" maxlength="150" autocomplete="given-name">

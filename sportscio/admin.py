@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Profile, Message, Announcement
+from .models import ClubDocument, Profile, Message, Announcement
 
 
 @admin.register(Profile)
@@ -7,6 +7,14 @@ class ProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'role', 'birthday')
     list_filter = ('role',)
     search_fields = ('user__username', 'user__email')
+
+
+@admin.register(ClubDocument)
+class ClubDocumentAdmin(admin.ModelAdmin):
+    list_display = ("title", "uploaded_by", "created_at")
+    list_filter = ("created_at",)
+    search_fields = ("title", "uploaded_by__username")
+    readonly_fields = ("created_at",)
 
 
 @admin.register(Message)
