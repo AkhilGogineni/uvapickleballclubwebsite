@@ -31,24 +31,4 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path('accounts/', include('allauth.urls')),
     path('messages/', views.messages_view, name='messages'),
-]   
-
-
-# urlpatterns = [
-#     # Home page for empty path
-#     path("", views.home, name="home"),
-
-#     #Route for app
-#     path("sportscio/", include("sportscio.urls")),  # all sportscio URLs go under /sportscio/
-
-#     # login/logout route
-#     path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"),
-#     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
-
-#     #default Django admin
-#     path("admin/", admin.site.urls),
-
-#     path('accounts/', include('allauth.urls')),
-
-    
-# ]
+]

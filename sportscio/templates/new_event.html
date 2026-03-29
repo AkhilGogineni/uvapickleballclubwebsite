@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Event | SportsCIO</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            color: #1f2937;
+        }
+
+        .page {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px 40px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a5f, #2f5a8a);
+            color: white;
+            padding: 32px;
+            border-radius: 18px;
+            box-shadow: 0 10px 28px rgba(30, 58, 95, 0.22);
+            margin-bottom: 28px;
+        }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #1e3a5f;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 130px;
+            resize: vertical;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            padding: 12px 14px;
+            border-radius: 10px;
+            margin-bottom: 18px;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            display: inline-block;
+            padding: 12px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: #1e3a5f;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2f5a8a;
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #111827;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <h1>Create New Event</h1>
+            <p>Add a club event to the executive schedule.</p>
+        </div>
+
+        <div class="card">
+            {% if error %}
+                <div class="error">{{ error }}</div>
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    <label for="title">Event Title</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="start_time">Start Date and Time</label>
+                    <input type="datetime-local" id="start_time" name="start_time" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="end_time">End Date and Time</label>
+                    <input type="datetime-local" id="end_time" name="end_time" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description"></textarea>
+                </div>
+
+                <div class="button-row">
+                    <button type="submit" class="btn-primary">Create Event</button>
+                    <a href="{% url 'exec_profile' %}" class="btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

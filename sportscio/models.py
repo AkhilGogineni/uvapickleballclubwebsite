@@ -44,3 +44,17 @@ class Announcement(models.Model):
 
     def is_author_admin(self):
         return self.author.is_superuser
+    
+class Event(models.Model):
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events')
+    title = models.CharField(max_length=200)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+    description = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['start_time']
+
+    def __str__(self):
+        return self.title

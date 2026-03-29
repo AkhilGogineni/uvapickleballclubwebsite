@@ -162,7 +162,8 @@ LOGIN_REDIRECT_URL = "/sportscio/"
 LOGOUT_REDIRECT_URL = "/login/"
 
 CLUB_EXEC_EMAILS = [
-    "william.wo2006@gmail.com",
+    # "william.wo2006@gmail.com",
+    "exec1@gmail.com"
     "exec2@gmail.com",
-    "spn7qm@virginia.edu",
+    "exec3@gmail.com",
 ]

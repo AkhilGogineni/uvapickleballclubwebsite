@@ -84,13 +84,15 @@
             word-break: break-word;
         }
 
-        .app-list {
+        .app-list,
+        .event-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
 
-        .app-list li {
+        .app-list li,
+        .event-item {
             padding: 14px 16px;
             margin-bottom: 12px;
             background: #f8fafc;
@@ -135,8 +137,58 @@
             transform: translateY(-2px);
         }
 
+        .btn-primary {
+            display: inline-block;
+            background: #1e3a5f;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.2);
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #2f5a8a;
+            transform: translateY(-2px);
+        }
+
         .button-group {
             margin-top: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .section-header h2 {
+            margin: 0;
+            color: #1e3a5f;
+        }
+
+        .event-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e3a5f;
+            margin-bottom: 6px;
+        }
+
+        .event-time {
+            font-size: 0.95rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .empty-text {
+            color: #6b7280;
+            font-style: italic;
+            margin: 0;
         }
     </style>
 </head>
@@ -168,15 +220,44 @@
 
     <div class="card">
         <h2>Applications</h2>
-        <ul class="app-list">
-            {% for app in applications %}
-            <li>{{ app }}</li>
-            {% endfor %}
-        </ul>
+
+        {% if applications %}
+            <ul class="app-list">
+                {% for app in applications %}
+                    <li>{{ app }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-text">No applications available yet.</p>
+        {% endif %}
+
         <div class="button-group">
             <a href="{% url 'messages' %}" class="btn">Messages</a>
             <a href="{% url 'announcements' %}" class="btn">Announcements</a>
         </div>
+    </div>
+
+    <div class="card">
+        <div class="section-header">
+            <h2>Schedule</h2>
+            <a href="{% url 'new_event' %}" class="btn-primary">New Event</a>
+        </div>
+
+        {% if events %}
+            <ul class="event-list">
+                {% for event in events %}
+                    <li class="event-item">
+                        <div class="event-title">{{ event.title }}</div>
+                        <div class="event-time">
+                            {{ event.start_time|date:"M j, Y g:i A" }} - {{ event.end_time|date:"M j, Y g:i A" }}
+                        </div>
+                        <div>{{ event.description }}</div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="empty-text">No events have been created yet.</p>
+        {% endif %}
     </div>
 </div>
 

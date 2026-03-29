@@ -81,9 +81,29 @@
             border-radius: 12px;
         }
 
-        
+        .event-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1e3a5f;
+            margin-bottom: 6px;
+        }
+
+        .event-time {
+            font-size: 0.95rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .empty-text {
+            color: #6b7280;
+            font-style: italic;
+            margin: 0;
+        }
+
         .btn {
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: white;
             color: #1e3a5f;
             padding: 24px;
@@ -95,21 +115,12 @@
             cursor: pointer;
             box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
             min-height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             transition: all 0.2s;
         }
 
         .btn:hover {
             box-shadow: 0 12px 28px rgba(30, 58, 95, 0.15);
             transform: translateY(-2px);
-        }
-        }
-
-        button:hover {
-            background: #f8fafc;
-            border-color: #1e3a5f;
         }
 
         @media (max-width: 800px) {
@@ -136,28 +147,43 @@
 
         <div class="card">
             <h2>Announcements</h2>
-            <ul class="styled-list">
-                {% for a in announcements %}
-                <li>{{ a }}</li>
-                {% endfor %}
-            </ul>
+            {% if announcements %}
+                <ul class="styled-list">
+                    {% for a in announcements %}
+                        <li>
+                            <strong>{{ a.title }}</strong><br>
+                            {{ a.content }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-text">No announcements available right now.</p>
+            {% endif %}
         </div>
 
         <div class="card" style="grid-column: 1 / -1;">
             <h2>Schedule</h2>
-            <ul class="styled-list">
-                {% for item in schedule %}
-                <li>{{ item.day }}: {{ item.event }} at {{ item.time }}</li>
-                {% endfor %}
-            </ul>
+            {% if events %}
+                <ul class="styled-list">
+                    {% for event in events %}
+                        <li>
+                            <div class="event-title">{{ event.title }}</div>
+                            <div class="event-time">
+                                {{ event.start_time|date:"M j, Y g:i A" }} - {{ event.end_time|date:"M j, Y g:i A" }}
+                            </div>
+                            <div>{{ event.description }}</div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="empty-text">No events have been posted yet.</p>
+            {% endif %}
         </div>
 
         <a href="{% url 'messages' %}" class="btn" style="grid-column: 1 / -1;">Messages</a>
         <a href="{% url 'announcements' %}" class="btn" style="grid-column: 1 / -1;">Announcements</a>
     </div>
 </div>
-
-
 
 </body>
 </html>

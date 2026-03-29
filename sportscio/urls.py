@@ -10,4 +10,5 @@ urlpatterns = [
     path("announcements/", views.announcements_view, name="announcements"),
     path("api/announcements/create/", views.create_announcement, name="create_announcement"),
     path("api/announcements/", views.get_announcements, name="get_announcements"),
+    path("exec/new-event/", views.new_event_view, name="new_event"),
 ]

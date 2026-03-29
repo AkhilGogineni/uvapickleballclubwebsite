@@ -6,8 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 import json
-from .models import Message, Announcement
-
+from .models import Message, Announcement, Event
 
 def is_exec(user):
     return hasattr(user, "profile") and user.profile.user_type == "exec"
@@ -28,7 +27,12 @@ def home(request):
 
 @login_required
 def user_profile_view(request):
-    return render(request, "profile_user.html")
+    events = Event.objects.all()
+    announcements = Announcement.objects.filter(is_active=True)
+    return render(request, "profile_user.html", {
+        "events": events,
+        "announcements": announcements,
+    })
 
 @login_required
 def messages_view(request):
@@ -38,7 +42,34 @@ def messages_view(request):
 @login_required
 @user_passes_test(is_exec)
 def exec_profile_view(request):
-    return render(request, "profile_exec.html")
+    events = Event.objects.all()
+    return render(request, "profile_exec.html", {"events": events})
+
+@login_required
+@user_passes_test(is_exec)
+def new_event_view(request):
+    error = None
+
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        start_time = request.POST.get("start_time", "").strip()
+        end_time = request.POST.get("end_time", "").strip()
+        description = request.POST.get("description", "").strip()
+
+        if not title or not start_time or not end_time:
+            error = "Title, start time, and end time are required."
+        elif end_time <= start_time:
+            error = "End time must be after start time."
+        else:
+            Event.objects.create(
+                created_by=request.user,
+                title=title,
+                start_time=start_time,
+                end_time=end_time,
+                description=description,
+            )
+            return redirect("exec_profile")
+    return render(request, "new_event.html", {"error": error})
 
 
 @login_required
