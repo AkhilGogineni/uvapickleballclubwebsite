@@ -1,7 +1,7 @@
 {% extends "base_app.html" %}
 {% block title %}Profile settings | SportsCIO{% endblock %}
 {% block page_heading %}Profile settings{% endblock %}
-{% block page_sub %}Update how you appear to the club. Role is assigned by officers or a user administrator.{% endblock %}
+{% block page_sub %}Update how you appear to the club. Role is assigned by a user administrator.{% endblock %}
 {% block extra_css %}
 <style>
     .settings-grid {
@@ -111,7 +111,7 @@
         <div class="readonly-block">
             <div class="label">Role</div>
             <div class="val">{{ user.profile.get_role_display }}</div>
-            <p class="hint" style="margin:10px 0 0;">Members and officers are managed by a user administrator or officers per your course rules.</p>
+            <p class="hint" style="margin:10px 0 0;">Members and officers are managed by a user administrator per your course rules.</p>
         </div>
     </div>
 </div>

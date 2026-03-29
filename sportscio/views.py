@@ -132,6 +132,7 @@ def calendar_view(request):
 def members_view(request):
     if is_user_admin(request.user):
         return redirect("user_role_admin")
+
     users = User.objects.select_related("profile").order_by("username")
     return render(request, "members.html", {"users": users, "nav_active": "members"})
 

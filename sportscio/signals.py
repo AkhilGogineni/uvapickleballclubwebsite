@@ -22,14 +22,15 @@ def save_profile(sender, instance, **kwargs):
 def assign_initial_role(user):
     profile, _ = Profile.objects.get_or_create(user=user)
 
-    exec_emails = getattr(settings, "CLUB_EXEC_EMAILS", [])
+    user_admin_emails = getattr(settings, "USER_ADMIN_EMAILS", [])
 
-    if user.email in exec_emails:
-        profile.role = Profile.ROLE_OFFICER
-    else:
-        profile.role = Profile.ROLE_MEMBER
+    # Default: member
+    profile.role = Profile.ROLE_MEMBER
 
-    profile.save()
+    if user.email in user_admin_emails:
+        profile.role = Profile.ROLE_USER_ADMIN
+
+    profile.save(update_fields=["role"])
 
 
 @receiver(user_signed_up)
