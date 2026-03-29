@@ -1,0 +1,98 @@
+{% extends "base_app.html" %}
+{% block title %}Profile settings | SportsCIO{% endblock %}
+{% block page_heading %}Profile settings{% endblock %}
+{% block page_sub %}Update how you appear to the club. Role is assigned by officers or a user administrator.{% endblock %}
+{% block extra_css %}
+<style>
+    .settings-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+    }
+    @media (max-width: 800px) { .settings-grid { grid-template-columns: 1fr; } }
+    .field { margin-bottom: 16px; }
+    .field label {
+        display: block;
+        font-weight: 600;
+        font-size: 0.88rem;
+        margin-bottom: 6px;
+        color: var(--c-ink);
+    }
+    .field input[type="text"],
+    .field input[type="date"] {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 14px;
+        border: 1px solid rgba(81, 118, 100, 0.35);
+        font: inherit;
+    }
+    .field .hint { font-size: 0.82rem; color: #6b7a72; margin-top: 6px; }
+    .readonly-block {
+        background: linear-gradient(180deg, rgba(214,229,227,0.4), rgba(202,207,214,0.2));
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+    }
+    .readonly-block .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7a72; margin-bottom: 4px; }
+    .readonly-block .val { font-weight: 600; color: var(--c-ink); }
+    .msg-list { list-style: none; padding: 0; margin: 0 0 18px; }
+    .msg-list li {
+        padding: 10px 14px;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        background: rgba(159, 216, 203, 0.35);
+        border: 1px solid rgba(81,118,100,0.25);
+        font-size: 0.92rem;
+    }
+</style>
+{% endblock %}
+{% block content %}
+{% if messages %}
+<ul class="msg-list">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+
+<div class="settings-grid">
+    <div class="card">
+        <h2 style="margin-top:0;">Display name</h2>
+        <p class="muted" style="margin-top:0;">Shown in the header, member list, and messaging.</p>
+        <form method="post" action="{% url 'profile_settings' %}">
+            {% csrf_token %}
+            <div class="field">
+                <label for="first_name">First name</label>
+                <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}" maxlength="150" autocomplete="given-name">
+            </div>
+            <div class="field">
+                <label for="last_name">Last name</label>
+                <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}" maxlength="150" autocomplete="family-name">
+            </div>
+            <div class="field">
+                <label for="birthday">Birthday (optional)</label>
+                <input type="date" id="birthday" name="birthday" value="{% if user.profile.birthday %}{{ user.profile.birthday|date:'Y-m-d' }}{% endif %}">
+                <p class="hint">Leave empty to clear.</p>
+            </div>
+            <button type="submit" class="btn-primary">Save changes</button>
+        </form>
+    </div>
+    <div class="card">
+        <h2 style="margin-top:0;">Account</h2>
+        <p class="muted" style="margin-top:0;">Read-only details from your login and roster.</p>
+        <div class="readonly-block">
+            <div class="label">Username</div>
+            <div class="val">{{ user.username }}</div>
+        </div>
+        <div class="readonly-block">
+            <div class="label">Email</div>
+            <div class="val">{{ user.email|default:"—" }}</div>
+        </div>
+        <div class="readonly-block">
+            <div class="label">Role</div>
+            <div class="val">{{ user.profile.get_role_display }}</div>
+            <p class="hint" style="margin:10px 0 0;">Members and officers are managed by a user administrator or officers per your course rules.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

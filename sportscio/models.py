@@ -3,16 +3,22 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 class Profile(models.Model):
-    USER_TYPES = (
-        ('student', 'Student'),
-        ('exec', 'CIO Executive'),
-    )   
+    ROLE_MEMBER = "member"
+    ROLE_OFFICER = "officer"
+    ROLE_USER_ADMIN = "user_admin"
+
+    ROLE_CHOICES = (
+        (ROLE_MEMBER, "Member"),
+        (ROLE_OFFICER, "Officer"),
+        (ROLE_USER_ADMIN, "User administrator"),
+    )
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    user_type = models.CharField(max_length=20, choices=USER_TYPES, default='student')
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default=ROLE_MEMBER)
+    birthday = models.DateField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user.username} ({self.user_type})"
+        return f"{self.user.username} ({self.get_role_display()})"
 
 
 class Message(models.Model):

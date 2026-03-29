@@ -68,6 +68,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
+    "sportscio.middleware.UserAdministratorAppRestrictionMiddleware",
 ]
 
 ROOT_URLCONF = "mysite.urls"
@@ -82,6 +83,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "sportscio.context_processors.roles",
             ],
         },
     },
@@ -158,12 +160,12 @@ STATIC_URL = "static/"
 
 
 LOGIN_URL = "/login/"
-LOGIN_REDIRECT_URL = "/sportscio/"
+LOGIN_REDIRECT_URL = "/sportscio/dashboard/"
 LOGOUT_REDIRECT_URL = "/login/"
 
 CLUB_EXEC_EMAILS = [
     # "william.wo2006@gmail.com",
-    "exec1@gmail.com"
+    "exec1@gmail.com",
     "exec2@gmail.com",
     "exec3@gmail.com",
 ]

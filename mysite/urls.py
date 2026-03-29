@@ -30,5 +30,4 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),#uses built in django logout view
     path("admin/", admin.site.urls),
     path('accounts/', include('allauth.urls')),
-    path('messages/', views.messages_view, name='messages'),
 ]

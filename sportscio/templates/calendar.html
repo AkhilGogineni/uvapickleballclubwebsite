@@ -1,0 +1,36 @@
+{% extends "base_app.html" %}
+{% block title %}Calendar | SportsCIO{% endblock %}
+{% block page_heading %}Calendar{% endblock %}
+{% block page_sub %}Practices, games, and club events in one place.{% endblock %}
+{% block content %}
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-bottom:18px;">
+    <p class="muted" style="margin:0;">{% if is_privileged %}Create events for the whole club.{% else %}View-only — officers can add events.{% endif %}</p>
+    {% if is_privileged %}
+    <a class="btn-primary" href="{% url 'new_event' %}">Create event</a>
+    {% endif %}
+</div>
+<div class="table-wrap">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Event</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Details</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for e in events %}
+            <tr>
+                <td><strong>{{ e.title }}</strong></td>
+                <td>{{ e.start_time|date:"M j, Y g:i A" }}</td>
+                <td>{{ e.end_time|date:"M j, Y g:i A" }}</td>
+                <td class="muted">{{ e.description|truncatewords:14|default:"—" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="muted">No events yet.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -198,6 +198,7 @@
     <div class="header">
         <h1>CIO Executive Profile</h1>
         <p>Review executive-level information and manage club operations.</p>
+        <p style="margin-top:14px;font-size:0.95rem;"><a href="{% url 'cio_profile' %}" style="color:#fff;font-weight:600;">Club hub</a> — member-facing org page</p>
     </div>
 
     <div class="card">
@@ -209,7 +210,7 @@
             </div>
             <div class="info-item">
                 <div class="label">Type</div>
-                <div class="value">{{ request.user.profile.user_type }}</div>
+                <div class="value">{{ request.user.profile.get_role_display }}</div>
             </div>
             <div class="info-item">
                 <div class="label">Email</div>

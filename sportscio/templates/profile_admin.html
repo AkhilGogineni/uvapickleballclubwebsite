@@ -135,6 +135,7 @@
         .button-group {
             margin-top: 24px;
         }
+    </style>
 </head>
 <body>
 
@@ -153,7 +154,7 @@
             </div>
             <div class="info-item">
                 <div class="label">Type</div>
-                <div class="value">{{ user_type }}</div>
+                <div class="value">{{ role_label }}</div>
             </div>
             <div class="info-item">
                 <div class="label">Email</div>
@@ -166,7 +167,11 @@
         <h2>All Users</h2>
         <ul class="user-list">
             {% for u in all_users %}
-            <li>{{ u }}</li>
+            <li>
+                <strong>{{ u.username }}</strong>
+                {% if u.profile %} — {{ u.profile.get_role_display }}{% endif %}
+                {% if u.email %}<br><span style="color:#6b7280;font-size:0.9rem;">{{ u.email }}</span>{% endif %}
+            </li>
             {% endfor %}
         </ul>
         <div class="button-group">

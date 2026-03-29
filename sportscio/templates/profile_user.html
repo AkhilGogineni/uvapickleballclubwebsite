@@ -136,12 +136,13 @@
     <div class="header">
         <h1>Welcome, {{ request.user.username }}!</h1>
         <p>Stay updated with announcements, events, and your club schedule.</p>
+        <p style="margin-top:14px;font-size:0.95rem;"><a href="{% url 'cio_profile' %}" style="color:#fff;font-weight:600;">Club hub</a> — org-wide schedule and planned features</p>
     </div>
 
     <div class="grid">
         <div class="card account-info">
             <h2>Account Information</h2>
-            <p><strong>User type:</strong> {{ request.user.profile.user_type }}</p>
+            <p><strong>Role:</strong> {{ request.user.profile.get_role_display }}</p>
             <p><strong>Email:</strong> {{ request.user.email }}</p>
         </div>
 

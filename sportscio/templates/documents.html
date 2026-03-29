@@ -1,0 +1,21 @@
+{% extends "base_app.html" %}
+{% block title %}Documents | SportsCIO{% endblock %}
+{% block page_heading %}Documents{% endblock %}
+{% block page_sub %}Policies, forms, and shared files — stored in S3 in a future sprint.{% endblock %}
+{% block content %}
+<div class="card-grid">
+    <div class="card">
+        <h2>Shared drive</h2>
+        <p class="muted">Upload and organize club documents here. This section is a styled placeholder until file uploads are wired to Amazon S3.</p>
+        {% if is_privileged %}
+        <button type="button" class="btn-primary" disabled style="opacity:0.65;cursor:not-allowed;">Add document (coming soon)</button>
+        {% else %}
+        <p class="muted">Officers will publish documents for all members.</p>
+        {% endif %}
+    </div>
+    <div class="card">
+        <h2>Placeholder</h2>
+        <p class="muted">No files yet.</p>
+    </div>
+</div>
+{% endblock %}

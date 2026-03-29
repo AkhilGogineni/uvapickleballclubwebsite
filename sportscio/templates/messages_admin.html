@@ -1,7 +1,7 @@
 {% extends "base_app.html" %}
-{% block title %}Club messaging | SportsCIO{% endblock %}
-{% block page_heading %}Club messaging{% endblock %}
-{% block page_sub %}Club-wide chat — everyone in the organization can participate.{% endblock %}
+{% block title %}Admin chat | SportsCIO{% endblock %}
+{% block page_heading %}Officer chat{% endblock %}
+{% block page_sub %}Private channel for officers and site superusers — not visible to members.{% endblock %}
 {% block extra_css %}
 <style>
     .chat-card {
@@ -18,7 +18,7 @@
         max-height: 420px;
         overflow-y: auto;
         border-radius: 14px;
-        background: linear-gradient(180deg, rgba(214,229,227,0.35), rgba(202,207,214,0.2));
+        background: linear-gradient(180deg, rgba(214,180,190,0.15), rgba(214,229,227,0.25));
         padding: 14px;
     }
     .message-item {
@@ -28,25 +28,12 @@
         border-radius: 14px;
         border: 1px solid rgba(202, 207, 214, 0.7);
     }
-    .message-item.own {
-        background: rgba(159, 216, 203, 0.35);
-        margin-left: 24px;
-    }
-    .message-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 6px;
-        font-size: 0.88rem;
-    }
+    .message-item.own { background: rgba(159, 216, 203, 0.4); margin-left: 24px; }
+    .message-header { display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.88rem; }
     .message-sender { font-weight: 700; color: var(--c-forest); }
     .message-timestamp { color: #6b7a72; }
     .message-text { color: #3d4a42; line-height: 1.45; }
-    .input-area {
-        display: flex;
-        gap: 10px;
-        align-items: flex-end;
-        margin-top: 12px;
-    }
+    .input-area { display: flex; gap: 10px; align-items: flex-end; margin-top: 12px; }
     .input-area textarea {
         flex: 1;
         min-height: 52px;
@@ -66,15 +53,7 @@
         cursor: pointer;
         height: 52px;
     }
-    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    .conn-dot {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        margin-left: 8px;
-        vertical-align: middle;
-    }
+    .conn-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-left: 8px; vertical-align: middle; }
     .conn-dot.ok { background: #517664; }
     .conn-dot.bad { background: #c45c5c; }
     .status-msg { font-size: 0.88rem; margin-bottom: 10px; min-height: 1.2em; }
@@ -82,7 +61,7 @@
 {% endblock %}
 {% block content %}
 <div class="chat-card">
-    <h2 style="margin-top:0;color:var(--c-forest);">General <span class="conn-dot bad" id="connection-indicator" title="status"></span></h2>
+    <h2 style="margin-top:0;color:var(--c-forest);">Officers <span class="conn-dot bad" id="connection-indicator"></span></h2>
     <div class="status-msg" id="status-message"></div>
     <ul class="message-list" id="message-list">
         {% for message in messages %}
@@ -94,11 +73,11 @@
             <div class="message-text">{{ message.content }}</div>
         </li>
         {% empty %}
-        <li class="muted" style="padding:24px;text-align:center;">No messages yet. Say hello below.</li>
+        <li class="muted" style="padding:24px;text-align:center;">No officer messages yet.</li>
         {% endfor %}
     </ul>
     <div class="input-area">
-        <textarea id="message-input" placeholder="Type a message…" maxlength="500"></textarea>
+        <textarea id="message-input" placeholder="Officer message…" maxlength="500"></textarea>
         <button type="button" class="send-btn" id="send-btn">Send</button>
     </div>
 </div>
@@ -118,7 +97,7 @@
     chatSocket.onopen = function() {
         connectionIndicator.className = 'conn-dot ok';
         const ph = messageList.querySelector('.muted');
-        if (ph && ph.textContent.includes('No messages')) ph.remove();
+        if (ph && ph.textContent.includes('No officer')) ph.remove();
     };
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
@@ -126,8 +105,7 @@
         const messageItem = document.createElement('li');
         messageItem.className = data.user_id === currentUserId ? 'message-item own' : 'message-item';
         const d = new Date(data.timestamp);
-        const timeStr = d.toLocaleString();
-        messageItem.innerHTML = '<div class="message-header"><span class="message-sender">' + escapeHtml(data.username) + '</span><span class="message-timestamp">' + timeStr + '</span></div><div class="message-text">' + escapeHtml(data.message) + '</div>';
+        messageItem.innerHTML = '<div class="message-header"><span class="message-sender">' + escapeHtml(data.username) + '</span><span class="message-timestamp">' + d.toLocaleString() + '</span></div><div class="message-text">' + escapeHtml(data.message) + '</div>';
         messageList.appendChild(messageItem);
         messageList.scrollTop = messageList.scrollHeight;
     };
@@ -140,7 +118,6 @@
         connectionIndicator.className = 'conn-dot bad';
         statusMessage.textContent = 'Connection issue.';
     };
-
     function sendMessage() {
         const message = messageInput.value.trim();
         if (!message || chatSocket.readyState !== WebSocket.OPEN) return;
