@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
+from django.db import connection
 from datetime import date, datetime, time, timedelta
 import calendar as pycal
 import json
@@ -26,8 +27,10 @@ def whoami_view(request):
         role = profile.role
     except Profile.DoesNotExist:
         role = None
+    db = connection.settings_dict
     return JsonResponse(
         {
+            "user_id": request.user.id,
             "username": request.user.username,
             "email": request.user.email,
             "is_authenticated": request.user.is_authenticated,
@@ -35,6 +38,8 @@ def whoami_view(request):
             "is_user_admin": is_user_admin(request.user),
             "is_officer": is_officer(request.user),
             "is_superuser": request.user.is_superuser,
+            "db_name": db.get("NAME"),
+            "db_host": db.get("HOST"),
         }
     )
 
