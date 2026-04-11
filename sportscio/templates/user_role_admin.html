@@ -70,7 +70,7 @@
 <div class="ura-wrap">
     <div class="ura-hero">
         <h1>User role management</h1>
-        <p>Switch accounts between <strong>Member</strong> and <strong>Officer</strong>. User administrator accounts are not editable here.</p>
+        <p>Switch accounts between <strong>Member</strong> and <strong>Club leader</strong>. User administrator accounts are not editable here.</p>
     </div>
     <p class="notice">This screen is the only in-app area for your role. Use <strong>Log out</strong> when finished.</p>
     {% if messages %}
@@ -102,7 +102,7 @@
                         <input type="hidden" name="user_id" value="{{ u.pk }}">
                         <select name="new_role" aria-label="New role for {{ u.username }}">
                             <option value="member" {% if u.profile.role == 'member' %}selected{% endif %}>Member</option>
-                            <option value="officer" {% if u.profile.role == 'officer' %}selected{% endif %}>Officer</option>
+                            <option value="officer" {% if u.profile.role == 'officer' %}selected{% endif %}>Club leader</option>
                         </select>
                         <button type="submit" class="btn-save">Save</button>
                     </form>

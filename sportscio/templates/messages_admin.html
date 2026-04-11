@@ -1,7 +1,7 @@
 {% extends "base_app.html" %}
 {% block title %}Admin chat | SportsCIO{% endblock %}
-{% block page_heading %}Officer chat{% endblock %}
-{% block page_sub %}Private channel for officers and site superusers — not visible to members.{% endblock %}
+{% block page_heading %}Club leader chat{% endblock %}
+{% block page_sub %}Private channel for club leaders and site superusers — not visible to members.{% endblock %}
 {% block extra_css %}
 <style>
     .chat-card {
@@ -61,7 +61,7 @@
 {% endblock %}
 {% block content %}
 <div class="chat-card">
-    <h2 style="margin-top:0;color:var(--c-forest);">Officers <span class="conn-dot bad" id="connection-indicator"></span></h2>
+    <h2 style="margin-top:0;color:var(--c-forest);">Club leaders <span class="conn-dot bad" id="connection-indicator"></span></h2>
     <div class="status-msg" id="status-message"></div>
     <ul class="message-list" id="message-list">
         {% for message in messages %}
@@ -73,11 +73,11 @@
             <div class="message-text">{{ message.content }}</div>
         </li>
         {% empty %}
-        <li class="muted" style="padding:24px;text-align:center;">No officer messages yet.</li>
+        <li class="muted" style="padding:24px;text-align:center;">No club leader messages yet.</li>
         {% endfor %}
     </ul>
     <div class="input-area">
-        <textarea id="message-input" placeholder="Officer message…" maxlength="500"></textarea>
+        <textarea id="message-input" placeholder="Club leader message…" maxlength="500"></textarea>
         <button type="button" class="send-btn" id="send-btn">Send</button>
     </div>
 </div>
@@ -97,7 +97,7 @@
     chatSocket.onopen = function() {
         connectionIndicator.className = 'conn-dot ok';
         const ph = messageList.querySelector('.muted');
-        if (ph && ph.textContent.includes('No officer')) ph.remove();
+        if (ph && ph.textContent.includes('No club leader')) ph.remove();
     };
     chatSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);

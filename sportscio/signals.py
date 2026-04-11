@@ -22,18 +22,13 @@ def save_profile(sender, instance, **kwargs):
 def assign_initial_role(user):
     profile, _ = Profile.objects.get_or_create(user=user)
 
-    user_admin_emails = getattr(settings, "USER_ADMIN_EMAILS", [])
-
-    # Default: member
+    # Default: member.
+    # User administrator accounts must be created through Django admin or direct DB updates,
+    # not through the normal signup flow.
     profile.role = Profile.ROLE_MEMBER
-
-    if user.email in user_admin_emails:
-        profile.role = Profile.ROLE_USER_ADMIN
-
     profile.save(update_fields=["role"])
 
 
 @receiver(user_signed_up)
 def handle_google_signup(request, user, **kwargs):
-    # Initial role only; later logins must not overwrite officer/admin assignments.
     assign_initial_role(user)

@@ -14,7 +14,7 @@
     {% if is_privileged %}
     <div class="card">
         <h2 style="margin-top:0;">Upload</h2>
-        <p class="muted">Officers and superusers can add files for members to download.</p>
+        <p class="muted">Club leaders and superusers can add files for members to download.</p>
         <form method="post" enctype="multipart/form-data" action="{% url 'documents' %}">
             {% csrf_token %}
             <div class="field" style="margin-bottom:14px;">
@@ -44,7 +44,7 @@
             {% endfor %}
         </ul>
         {% else %}
-        <p class="muted">No documents yet.{% if is_privileged %} Upload one above, or register a file in Django admin → <strong>Club documents</strong>.{% else %} Check back when officers add files.{% endif %} Putting a file only in Amazon S3 does not create a row in this app, so it won’t show in the list.</p>
+        <p class="muted">No documents yet.{% if is_privileged %} Upload one above, or register a file in Django admin → <strong>Club documents</strong>.{% else %} Check back when club leaders add files.{% endif %} Putting a file only in Amazon S3 does not create a row in this app, so it won’t show in the list.</p>
         {% endif %}
     </div>
 </div>

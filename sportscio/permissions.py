@@ -1,4 +1,8 @@
-"""App-level roles: member, officer, user_admin (see course spec)."""
+"""App-level roles: member, club leader, user_admin.
+
+Club leaders can upload documents, post announcements, and manage events.
+User administrators may only manage role assignments and cannot use app features.
+"""
 from .models import Profile
 
 
@@ -27,5 +31,5 @@ def is_member(user):
 
 
 def is_privileged(user):
-    """Officer tools + Django superuser (same UI shell for now)."""
+    """Club leader tools + Django superuser (same UI shell for now)."""
     return is_officer(user) or (user.is_authenticated and user.is_superuser)
