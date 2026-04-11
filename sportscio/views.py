@@ -171,7 +171,7 @@ def documents_view(request):
 
     if request.method == "POST":
         if not is_privileged(request.user):
-            django_messages.error(request, "Only officers can upload documents.")
+            django_messages.error(request, "Only club leaders can upload documents.")
             return redirect("documents")
         title = request.POST.get("title", "").strip()
         upload = request.FILES.get("file")
@@ -375,7 +375,7 @@ def create_announcement(request):
     user = request.user
     if not (is_officer(user) or user.is_superuser):
         return JsonResponse(
-            {"error": "Only officers can create announcements"}, status=403
+            {"error": "Only club leaders can create announcements"}, status=403
         )
 
     try:

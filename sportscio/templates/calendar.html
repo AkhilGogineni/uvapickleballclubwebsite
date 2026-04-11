@@ -164,7 +164,7 @@
         <a href="?year={{ today.year }}&month={{ today.month }}">Today</a>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <p class="muted" style="margin:0;">{% if is_privileged %}Click <strong>Create event</strong> to add to the grid.{% else %}View-only — officers add events.{% endif %}</p>
+        <p class="muted" style="margin:0;">{% if is_privileged %}Click <strong>Create event</strong> to add to the grid.{% else %}View-only — club leaders add events.{% endif %}</p>
         {% if is_privileged %}
         <a class="btn-primary" href="{% url 'new_event' %}">Create event</a>
         {% endif %}

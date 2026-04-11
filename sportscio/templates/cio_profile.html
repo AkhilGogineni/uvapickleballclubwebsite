@@ -88,7 +88,7 @@
     <a href="{% url 'messages' %}">Messages</a>
     <a href="{% url 'announcements' %}">Announcements</a>
     {% if is_officer %}
-    <a href="{% url 'exec_profile' %}">Officer tools</a>
+    <a href="{% url 'exec_profile' %}">Club leader tools</a>
     {% endif %}
 </nav>
 
@@ -96,7 +96,7 @@
     <div class="hero">
         <h1>Your sports CIO</h1>
         <p>
-            Central place for members and officers: schedule, updates, and messaging.
+            Central place for members and club leaders: schedule, updates, and messaging.
             More capabilities (documents, roster, attendance) will plug in here as the semester continues.
         </p>
     </div>
@@ -116,9 +116,9 @@
         <div class="card">
             <h2>On the roadmap</h2>
             <ul>
-                <li>Shared documents (S3) with officer vs member visibility</li>
+                <li>Shared documents (S3) with club leader vs member visibility</li>
                 <li>Roster, RSVPs, and attendance</li>
-                <li>Officer permissions and moderation</li>
+                <li>Club leader permissions and moderation</li>
             </ul>
             <p class="soon">Placeholder sections keep stakeholders aligned with the project brief.</p>
         </div>
@@ -132,7 +132,7 @@
                 </div>
                 {% endfor %}
             {% else %}
-                <p class="soon">No events yet — officers can add them from the executive profile.</p>
+                <p class="soon">No events yet — club leaders can add them from the executive profile.</p>
             {% endif %}
             {% if is_officer %}
             <div class="links-row">

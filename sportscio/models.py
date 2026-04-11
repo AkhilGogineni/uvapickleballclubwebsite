@@ -9,7 +9,7 @@ class Profile(models.Model):
 
     ROLE_CHOICES = (
         (ROLE_MEMBER, "Member"),
-        (ROLE_OFFICER, "Officer"),
+        (ROLE_OFFICER, "Club leader"),
         (ROLE_USER_ADMIN, "User administrator"),
     )
 

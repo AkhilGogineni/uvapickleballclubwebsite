@@ -212,15 +212,8 @@ CLUB_EXEC_EMAILS = [
     "exec3@gmail.com",
 ]
 
-# Role assignment on initial Google signup (email allowlist).
+# Role assignment on initial Google signup.
 # - Members: default for everyone
-# - Officers: assigned by a user administrator inside the app
-# - User administrators: can only access /sportscio/user-roles/ (cannot edit profiles or use app features)
-#
-# Configure via Heroku config var:
-#   USER_ADMIN_EMAILS="admin1@virginia.edu,admin2@gmail.com"
-def _csv_emails(value: str):
-    return [e.strip().lower() for e in (value or "").split(",") if e.strip()]
-
-
-USER_ADMIN_EMAILS = _csv_emails(os.environ.get("USER_ADMIN_EMAILS", ""))
+# - Club leaders: assigned by a user administrator inside the app
+# - User administrators: must be created through Django admin or direct DB updates
+#   and cannot be assigned through signup.
