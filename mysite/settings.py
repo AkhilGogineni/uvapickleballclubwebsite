@@ -29,6 +29,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['swe-group8-6275098586a9.herokuapp.com', '0.0.0.0', '127.0.0.1', 'localhost', '.herokuapp.com']
 
+# Heroku terminates TLS; the dyno sees HTTP. Without this, request.is_secure() is False and
+# django-allauth builds OAuth redirect_uri as http://… while Google expects https:// → Error 400: redirect_uri_mismatch.
+if os.environ.get("DYNO"):
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
 # Application definition
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
