@@ -36,6 +36,8 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 SITE_ID=2
 
 INSTALLED_APPS = [
+    "daphne",
+    "channels",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -101,6 +103,14 @@ AUTHENTICATION_BACKENDS = [
 
 
 WSGI_APPLICATION = "mysite.wsgi.application"
+ASGI_APPLICATION = "mysite.asgi.application"
+
+# Django Channels (single-process / one Heroku web dyno). Use Redis + channels_redis if you scale web workers.
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
 
 
 # Database

@@ -4,6 +4,7 @@ from channels.db import database_sync_to_async
 
 # Store active chat consumers for broadcasting
 chat_consumers = {}
+announcement_consumers = []
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
