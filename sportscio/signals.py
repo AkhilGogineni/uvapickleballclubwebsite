@@ -30,6 +30,3 @@ def assign_initial_role(user):
         profile.save(update_fields=["role"])
 
 
-@receiver(user_signed_up)
-def handle_google_signup(request, user, **kwargs):
-    assign_initial_role(user)
