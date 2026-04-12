@@ -20,13 +20,14 @@ def save_profile(sender, instance, **kwargs):
 
 
 def assign_initial_role(user):
-    profile, _ = Profile.objects.get_or_create(user=user)
+    profile, created = Profile.objects.get_or_create(user=user)
 
     # Default: member.
     # User administrator accounts must be created through Django admin or direct DB updates,
     # not through the normal signup flow.
-    profile.role = Profile.ROLE_MEMBER
-    profile.save(update_fields=["role"])
+    if created:
+        profile.role = Profile.ROLE_MEMBER
+        profile.save(update_fields=["role"])
 
 
 @receiver(user_signed_up)
