@@ -22,7 +22,16 @@
         <tbody>
             {% for u in users %}
             <tr>
-                <td><strong>{{ u.get_full_name|default:u.username }}</strong></td>
+                <td style="display: flex; align-items: center; gap: 12px;">
+                    {% if u.profile.avatar %}
+                        <img src="{{ u.profile.avatar.url }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+                    {% else %}
+                        <div style="width: 32px; height: 32px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #64748b; font-weight: 700;">
+                            {{ u.username|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
+                    <strong>{{ u.get_full_name|default:u.username }}</strong>
+                </td>
                 <td>{{ u.email|default:"—" }}</td>
                 <td>
                     {% if u.profile %}

@@ -209,7 +209,15 @@
              data-iso="{{ message.timestamp|date:'c' }}">
             <div class="bubble-col">
                 {% if message.sender != user %}
-                <span class="sender-pill">{{ message.sender.get_full_name|default:message.sender.username }}</span>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    {% if message.sender.profile.avatar %}
+                        <img src="{{ message.sender.profile.avatar.url }}" 
+                            style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+                    {% else %}
+                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #ccc;"></div>
+                    {% endif %}
+                    <span class="sender-pill" style="margin: 0;">{{ message.sender.get_full_name|default:message.sender.username }}</span>
+                </div>
                 {% endif %}
                 <div class="bubble">{{ message.content|linebreaksbr }}</div>
             </div>
