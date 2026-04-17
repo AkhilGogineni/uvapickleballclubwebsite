@@ -4,38 +4,39 @@
 {% block page_sub %}Official updates from your club leaders.{% endblock %}
 {% block extra_css %}
 <style>
-    .announcement-card {
-        background: var(--c-white);
-        border: 1px solid rgba(202, 207, 214, 0.8);
-        border-radius: 18px;
-        padding: 20px 22px;
-        margin-bottom: 16px;
-        box-shadow: var(--shadow-soft);
-    }
+    .announcement-card { background: var(--c-white); border: 1px solid rgba(202, 207, 214, 0.8); border-radius: 18px; padding: 20px 22px; margin-bottom: 16px; box-shadow: var(--shadow-soft); }
     .announcement-card h3 { margin: 0 0 10px; color: var(--c-forest); font-size: 1.15rem; }
     .announcement-card p { margin: 0 0 12px; color: #3d4a42; line-height: 1.55; }
-    .announcement-meta {
-        font-size: 0.85rem;
-        color: #6b7a72;
+    .announcement-meta { font-size: 0.85rem; color: #6b7a72; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(202, 207, 214, 0.7); padding-top: 12px; }
+    .meta-author { display: flex; align-items: center; gap: 8px; }
+    
+    /* Fixed Avatar Styles */
+    .meta-avatar { 
+        width: 24px; 
+        height: 24px; 
+        border-radius: 50%; 
+        object-fit: cover; 
+        flex-shrink: 0;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        border-top: 1px solid rgba(202, 207, 214, 0.7);
-        padding-top: 12px;
+        justify-content: center;
+        background: #e2e8f0;
+        font-size: 0.7rem;
+        color: #64748b;
+        font-weight: 700;
+        overflow: hidden;
     }
-    .meta-author { display: flex; align-items: center; gap: 8px; }
-    .meta-avatar { width: 20px; height: 20px; border-radius: 50%; object-fit: cover; background: #ccc; }
+
     .form-create .field { margin-bottom: 14px; }
     .form-create label { display: block; font-weight: 600; margin-bottom: 6px; color: var(--c-ink); }
-    .form-create input, .form-create textarea {
-        width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(81, 118, 100, 0.35); font: inherit;
-    }
+    .form-create input, .form-create textarea { width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(81, 118, 100, 0.35); font: inherit; }
     .form-create textarea { min-height: 120px; resize: vertical; }
     .alert { padding: 12px 14px; border-radius: 12px; margin-bottom: 12px; display: none; }
     .alert-success { background: rgba(159, 216, 203, 0.35); color: var(--c-ink); border: 1px solid rgba(81,118,100,0.3); }
     .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
 </style>
 {% endblock %}
+
 {% block content %}
 {% if is_officer or user.is_superuser %}
 <div class="card" style="margin-bottom:22px;">
@@ -59,52 +60,49 @@
 <div>
     <h2 style="color:var(--c-forest);font-size:1.1rem;margin-bottom:14px;">Feed</h2>
     <div id="announcements-list">
-        {% if announcements %}
-            {% for announcement in announcements %}
-            <div class="announcement-card">
-                <h3>{{ announcement.title }}</h3>
-                <p>{{ announcement.content }}</p>
-                <div class="announcement-meta">
-                    <div class="meta-author">
-                        {% if announcement.author.profile.avatar %}
-                            <img src="{{ announcement.author.profile.avatar.url }}" class="meta-avatar" alt="">
-                        {% else %}
-                            <div class="meta-avatar"></div>
-                        {% endif %}
-                        <span>{{ announcement.author.get_full_name|default:announcement.author.username }}</span>
-                    </div>
-                    <span>{{ announcement.created_at|date:"M d, Y g:i A" }}</span>
+        {% for announcement in announcements %}
+        <div class="announcement-card">
+            <h3>{{ announcement.title }}</h3>
+            <p>{{ announcement.content }}</p>
+            <div class="announcement-meta">
+                <div class="meta-author">
+                    {% if announcement.author.profile.avatar %}
+                        <img src="{{ announcement.author.profile.avatar.url }}" class="meta-avatar" alt="Author photo">
+                    {% else %}
+                        <div class="meta-avatar">
+                            {{ announcement.author.first_name|default:announcement.author.username|slice:":1"|upper }}
+                        </div>
+                    {% endif %}
+                    <span>{{ announcement.author.get_full_name|default:announcement.author.username }}</span>
                 </div>
+                <span>{{ announcement.created_at|date:"M d, Y g:i A" }}</span>
             </div>
-            {% endfor %}
-        {% else %}
-            <p class="muted" id="no-ann">No announcements yet.</p>
-        {% endif %}
+        </div>
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
+
 {% block extra_js %}
 <script>
     const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
     const announcementSocket = new WebSocket(`${wsScheme}://${window.location.host}/ws/announcements/`);
+    
     announcementSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-        if (data.type === 'announcement' || data.type === 'announcement_message') {
-            prependAnnouncement(data);
-        }
+        if (data.type === 'announcement' || data.type === 'announcement_message') { prependAnnouncement(data); }
     };
+
     function prependAnnouncement(data) {
         const list = document.getElementById('announcements-list');
-        const noEl = document.getElementById('no-ann');
-        if (noEl) noEl.remove();
-        
         const date = new Date(data.created_at).toLocaleString();
         const card = document.createElement('div');
         card.className = 'announcement-card';
         
+        const initial = (data.author_first_name || data.author || 'M').charAt(0).toUpperCase();
         const avatarHtml = data.author_avatar_url 
             ? `<img src="${data.author_avatar_url}" class="meta-avatar">`
-            : `<div class="meta-avatar"></div>`;
+            : `<div class="meta-avatar">${initial}</div>`;
 
         card.innerHTML = `
             <h3>${escapeHtml(data.title)}</h3>
@@ -118,6 +116,7 @@
             </div>`;
         list.insertBefore(card, list.firstChild);
     }
+
     function escapeHtml(t) { return String(t).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#039;"}[m])); }
 
     {% if is_officer or user.is_superuser %}
@@ -125,15 +124,27 @@
         e.preventDefault();
         const title = document.getElementById('title').value;
         const content = document.getElementById('content').value;
+        const messageDiv = document.getElementById('message');
+        
         fetch('{% url "create_announcement" %}', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}',
+            },
             body: JSON.stringify({ title, content })
-        }).then(res => res.json()).then(data => {
-            if (!data.error) {
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                messageDiv.className = 'alert alert-error';
+                messageDiv.textContent = data.error;
+            } else {
+                messageDiv.className = 'alert alert-success';
+                messageDiv.textContent = 'Published!';
                 document.getElementById('announcement-form').reset();
-                // Note: The view needs to return author_avatar_url in the JSON response
             }
+            messageDiv.style.display = 'block';
         });
     });
     {% endif %}
