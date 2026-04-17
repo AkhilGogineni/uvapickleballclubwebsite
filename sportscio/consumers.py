@@ -2,7 +2,6 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 
-# Store active chat consumers for broadcasting
 chat_consumers = {}
 announcement_consumers = []
 
@@ -15,7 +14,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
-        # Store this consumer for broadcasting
         if self.room_name not in chat_consumers:
             chat_consumers[self.room_name] = []
         chat_consumers[self.room_name].append(self)
@@ -34,16 +32,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message_content = data.get('message')
 
         if message_content and self.user.is_authenticated:
-            # Save message to database
             db_message = await self.save_message(message_content, self.room_name, self.user)
+            avatar_url = await self.get_avatar_url(self.user)
 
-            # Broadcast to all consumers in this room
             if self.room_name in chat_consumers:
                 for consumer in chat_consumers[self.room_name]:
                     await consumer.send(text_data=json.dumps({
                         'type': 'chat_message',
                         'message': message_content,
                         'username': self.user.username,
+                        'first_name': self.user.first_name,
+                        'display_name': self.user.get_full_name() or self.user.username,
+                        'avatar_url': avatar_url,
                         'timestamp': db_message.timestamp.isoformat(),
                         'user_id': self.user.id,
                     }))
@@ -53,6 +53,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
         from .models import Message
         return Message.objects.create(sender=user, content=content, room=room)
 
+    @database_sync_to_async
+    def get_avatar_url(self, user):
+        try:
+            if hasattr(user, 'profile') and user.profile.avatar:
+                return user.profile.avatar.url
+        except:
+            pass
+        return None
 
 class AnnouncementConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -70,5 +78,7 @@ class AnnouncementConsumer(AsyncWebsocketConsumer):
             'title': event['title'],
             'content': event['content'],
             'author': event['author'],
+            'author_first_name': event.get('author_first_name', ''),
+            'author_avatar_url': event.get('author_avatar_url'),
             'created_at': event['created_at'],
         }))

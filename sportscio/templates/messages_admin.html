@@ -36,7 +36,7 @@
 {% block content %}
 <div class="phone-chat-shell" id="phone-chat">
     <div class="phone-chat-top">
-        <h2>Club leaders <span class="conn-dot bad" id="connection-indicator" title="connection"></span></h2>
+        <h2>Club leaders <span class="conn-dot bad" id="connection-indicator"></span></h2>
         <button type="button" class="times-chip" id="toggle-times" aria-pressed="false">Times</button>
     </div>
     <div class="status-msg" id="status-message"></div>
@@ -52,7 +52,9 @@
                     {% if message.sender.profile.avatar %}
                         <img src="{{ message.sender.profile.avatar.url }}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
                     {% else %}
-                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #ccc;"></div>
+                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #64748b; font-weight: 700;">
+                            {{ message.sender.first_name|default:message.sender.username|slice:":1"|upper }}
+                        </div>
                     {% endif %}
                     <span class="sender-pill">{{ message.sender.get_full_name|default:message.sender.username }}</span>
                 </div>
@@ -105,10 +107,16 @@
         if (!own) {
             const header = document.createElement('div');
             header.style = "display: flex; align-items: center; gap: 8px; margin-bottom: 4px;";
-            const avatar = data.avatar_url 
-                ? `<img src="${data.avatar_url}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">`
-                : `<div style="width: 24px; height: 24px; border-radius: 50%; background: #ccc;"></div>`;
-            header.innerHTML = `${avatar}<span class="sender-pill">${escapeHtml(data.username || 'Member')}</span>`;
+            
+            let avatarHtml = '';
+            if (data.avatar_url) {
+                avatarHtml = `<img src="${data.avatar_url}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">`;
+            } else {
+                const initial = (data.first_name || data.username || 'M').charAt(0).toUpperCase();
+                avatarHtml = `<div style="width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #64748b; font-weight: 700;">${initial}</div>`;
+            }
+
+            header.innerHTML = `${avatarHtml}<span class="sender-pill">${escapeHtml(data.display_name || data.username || 'Member')}</span>`;
             bubbleCol.appendChild(header);
         }
         const bubble = document.createElement('div');
@@ -129,3 +137,14 @@
 
     function sendMessage() {
         const val = messageInput.value.trim();
+        if (val && chatSocket.readyState === WebSocket.OPEN) {
+            chatSocket.send(JSON.stringify({ message: val }));
+            messageInput.value = '';
+        }
+    }
+    sendBtn.onclick = sendMessage;
+    messageInput.onkeydown = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } };
+    messageList.scrollTop = messageList.scrollHeight;
+})();
+</script>
+{% endblock %}
