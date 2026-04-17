@@ -209,10 +209,19 @@ def profile_settings_view(request):
         first = request.POST.get("first_name", "").strip()
         last = request.POST.get("last_name", "").strip()
         birthday_raw = request.POST.get("birthday", "").strip()
+        phone = request.POST.get("phone_number", "").strip()
+        
+        # Checkboxes only sent if checked
+        email_notifs = request.POST.get("email_notifications") == "on"
+        sms_notifs = request.POST.get("sms_notifications") == "on"
 
         user.first_name = first[:150]
         user.last_name = last[:150]
         user.save(update_fields=["first_name", "last_name"])
+
+        profile.phone_number = phone[:15]
+        profile.email_notifications = email_notifs
+        profile.sms_notifications = sms_notifs
 
         if birthday_raw:
             try:

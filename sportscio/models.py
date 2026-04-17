@@ -22,6 +22,11 @@ class Profile(models.Model):
         null=True,
         help_text="Profile photo; stored in S3 in production.",
     )
+    
+    # New Notification Fields
+    phone_number = models.CharField(max_length=15, blank=True, null=True)
+    email_notifications = models.BooleanField(default=True)
+    sms_notifications = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} ({self.get_role_display()})"
@@ -57,9 +62,8 @@ class Announcement(models.Model):
     def is_author_admin(self):
         return self.author.is_superuser
     
-class ClubDocument(models.Model):
-    """Shared club files (policies, forms). Files live on S3 in production, not in Postgres."""
 
+class ClubDocument(models.Model):
     uploaded_by = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="club_documents"
     )
