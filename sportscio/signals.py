@@ -1,3 +1,5 @@
+import os
+from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -18,42 +20,60 @@ def save_profile(sender, instance, **kwargs):
 @receiver(post_save, sender=Announcement)
 def notify_members_new_announcement(sender, instance, created, **kwargs):
     if created:
-        # ONLY get users who have email_notifications = True
         recipient_list = list(User.objects.filter(
             is_active=True, 
             profile__email_notifications=True
         ).values_list('email', flat=True))
         
         recipient_list = [email for email in recipient_list if email]
-        if not recipient_list: return
+        if not recipient_list: 
+            return
 
         author_name = instance.author.get_full_name() or instance.author.username
         subject = f"SportsCIO Announcement: {instance.title}"
         message = f"New announcement from {author_name}:\n\n{instance.title}\n\n{instance.content}"
         
+        from_email = f"SportsCIO <{settings.DEFAULT_FROM_EMAIL}>"
+
         try:
-            send_mass_mail(((subject, message, settings.DEFAULT_FROM_EMAIL, [e]) for e in recipient_list), fail_silently=True)
+            send_mass_mail(((subject, message, from_email, [e]) for e in recipient_list), fail_silently=True)
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Announcement Email Error: {e}")
 
 @receiver(post_save, sender=Event)
 def notify_members_new_event(sender, instance, created, **kwargs):
     if created:
-        # ONLY get users who have email_notifications = True
         recipient_list = list(User.objects.filter(
             is_active=True, 
             profile__email_notifications=True
         ).values_list('email', flat=True))
         
         recipient_list = [email for email in recipient_list if email]
-        if not recipient_list: return
+        if not recipient_list: 
+            return
 
         author_name = instance.created_by.get_full_name() or instance.created_by.username
-        start_str = instance.start_time.strftime("%B %d at %I:%M %p")
+        
+        # Handle start_time whether it is a string or a datetime object
+        st = instance.start_time
+        if isinstance(st, str):
+            try:
+                # Parses 'YYYY-MM-DDTHH:MM' or similar ISO formats
+                st = datetime.fromisoformat(st.replace('Z', '+00:00'))
+            except ValueError:
+                st = None
+
+        if st and hasattr(st, 'strftime'):
+            start_str = st.strftime("%B %d at %I:%M %p")
+        else:
+            start_str = str(instance.start_time)
+
         subject = f"New Event: {instance.title}"
         message = f"{author_name} added an event: {instance.title}\nWhen: {start_str}\n\n{instance.description}"
         
+        from_email = f"SportsCIO <{settings.DEFAULT_FROM_EMAIL}>"
+
         try:
-            send_mass_mail(((subject, message, settings.DEFAULT_FROM_EMAIL, [e]) for e in recipient_list), fail_silently=True)
+            send_mass_mail(((subject, message, from_email, [e]) for e in recipient_list), fail_silently=True)
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Event Email Error: {e}")
