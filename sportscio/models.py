@@ -23,14 +23,10 @@ class Profile(models.Model):
         help_text="Profile photo; stored in S3 in production.",
     )
     
-    # New Notification Fields
-    phone_number = models.CharField(max_length=15, blank=True, null=True)
     email_notifications = models.BooleanField(default=True)
-    sms_notifications = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} ({self.get_role_display()})"
-
 
 class Message(models.Model):
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
@@ -43,7 +39,6 @@ class Message(models.Model):
 
     def __str__(self):
         return f"{self.sender.username}: {self.content[:50]}"
-
 
 class Announcement(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='announcements')
@@ -59,14 +54,8 @@ class Announcement(models.Model):
     def __str__(self):
         return self.title
 
-    def is_author_admin(self):
-        return self.author.is_superuser
-    
-
 class ClubDocument(models.Model):
-    uploaded_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="club_documents"
-    )
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="club_documents")
     title = models.CharField(max_length=200)
     file = models.FileField(upload_to="documents/%Y/%m/")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -76,7 +65,6 @@ class ClubDocument(models.Model):
 
     def __str__(self):
         return self.title
-
 
 class Event(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='events')
