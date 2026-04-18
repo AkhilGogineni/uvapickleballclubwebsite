@@ -23,7 +23,7 @@ class Profile(models.Model):
         help_text="Profile photo; stored in S3 in production.",
     )
     
-    email_notifications = models.BooleanField(default=True)
+    email_notifications = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} ({self.get_role_display()})"
