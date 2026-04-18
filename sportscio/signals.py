@@ -1,4 +1,5 @@
 import os
+import threading
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -7,6 +8,22 @@ from django.dispatch import receiver
 from django.core.mail import send_mass_mail
 from .models import Profile, Announcement, Event
 
+# --- Helper function for background sending ---
+def send_email_in_background(subject, message, from_email, recipient_list):
+    """
+    Executes the SMTP sending process in a separate thread to prevent
+    the web request from hanging.
+    """
+    try:
+        # We use a generator to send a separate email to each recipient
+        # so they don't see everyone else's email address in the 'To' field.
+        datatuple = ((subject, message, from_email, [email]) for email in recipient_list)
+        send_mass_mail(datatuple, fail_silently=False)
+    except Exception as e:
+        # Since this is in a thread, we print to the logs so you can see if it fails
+        print(f"Background SMTP Error: {e}")
+
+# --- User & Profile Signals ---
 @receiver(post_save, sender=User)
 def create_profile(sender, instance, created, **kwargs):
     if created:
@@ -17,6 +34,7 @@ def save_profile(sender, instance, **kwargs):
     if hasattr(instance, 'profile'):
         instance.profile.save()
 
+# --- Announcement Signal ---
 @receiver(post_save, sender=Announcement)
 def notify_members_new_announcement(sender, instance, created, **kwargs):
     if created:
@@ -25,21 +43,23 @@ def notify_members_new_announcement(sender, instance, created, **kwargs):
             profile__email_notifications=True
         ).values_list('email', flat=True))
         
-        recipient_list = [email for email in recipient_list if email]
+        recipient_list = [email for email in recipient_list if email if email]
         if not recipient_list: 
             return
 
         author_name = instance.author.get_full_name() or instance.author.username
         subject = f"SportsCIO Announcement: {instance.title}"
         message = f"New announcement from {author_name}:\n\n{instance.title}\n\n{instance.content}"
-        
         from_email = f"SportsCIO <{settings.DEFAULT_FROM_EMAIL}>"
 
-        try:
-            send_mass_mail(((subject, message, from_email, [e]) for e in recipient_list), fail_silently=True)
-        except Exception as e:
-            print(f"Announcement Email Error: {e}")
+        # Start background thread
+        thread = threading.Thread(
+            target=send_email_in_background,
+            args=(subject, message, from_email, recipient_list)
+        )
+        thread.start()
 
+# --- Event Signal ---
 @receiver(post_save, sender=Event)
 def notify_members_new_event(sender, instance, created, **kwargs):
     if created:
@@ -54,11 +74,10 @@ def notify_members_new_event(sender, instance, created, **kwargs):
 
         author_name = instance.created_by.get_full_name() or instance.created_by.username
         
-        # Handle start_time whether it is a string or a datetime object
+        # Datetime conversion logic for strftime safety
         st = instance.start_time
         if isinstance(st, str):
             try:
-                # Parses 'YYYY-MM-DDTHH:MM' or similar ISO formats
                 st = datetime.fromisoformat(st.replace('Z', '+00:00'))
             except ValueError:
                 st = None
@@ -70,10 +89,11 @@ def notify_members_new_event(sender, instance, created, **kwargs):
 
         subject = f"New Event: {instance.title}"
         message = f"{author_name} added an event: {instance.title}\nWhen: {start_str}\n\n{instance.description}"
-        
         from_email = f"SportsCIO <{settings.DEFAULT_FROM_EMAIL}>"
 
-        try:
-            send_mass_mail(((subject, message, from_email, [e]) for e in recipient_list), fail_silently=True)
-        except Exception as e:
-            print(f"Event Email Error: {e}")
+        # Start background thread
+        thread = threading.Thread(
+            target=send_email_in_background,
+            args=(subject, message, from_email, recipient_list)
+        )
+        thread.start()
