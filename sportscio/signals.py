@@ -1,16 +1,25 @@
 import os
-import threading
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mass_mail
+from background_task import background
 from .models import Profile, Announcement, Event
 
-def send_email_in_background(subject, message, from_email, recipient_list):
+@background(schedule=0)
+def send_announcement_email(subject, message, from_email, recipient_list):
     try:
-        datatuple = ((subject, message, from_email, [email]) for email in recipient_list)
+        datatuple = tuple((subject, message, from_email, [email]) for email in recipient_list)
+        send_mass_mail(datatuple, fail_silently=False)
+    except Exception as e:
+        print(f"Background SMTP Error: {e}")
+
+@background(schedule=0)
+def send_event_email(subject, message, from_email, recipient_list):
+    try:
+        datatuple = tuple((subject, message, from_email, [email]) for email in recipient_list)
         send_mass_mail(datatuple, fail_silently=False)
     except Exception as e:
         print(f"Background SMTP Error: {e}")
@@ -29,12 +38,12 @@ def save_profile(sender, instance, **kwargs):
 def notify_members_new_announcement(sender, instance, created, **kwargs):
     if created:
         recipient_list = list(User.objects.filter(
-            is_active=True, 
+            is_active=True,
             profile__email_notifications=True
         ).values_list('email', flat=True))
-        
+
         recipient_list = [email for email in recipient_list if email]
-        if not recipient_list: 
+        if not recipient_list:
             return
 
         author_name = instance.author.get_full_name() or instance.author.username
@@ -42,21 +51,18 @@ def notify_members_new_announcement(sender, instance, created, **kwargs):
         message = f"New announcement from {author_name}:\n\n{instance.title}\n\n{instance.content}"
         from_email = f"SportsCIO <{settings.DEFAULT_FROM_EMAIL}>"
 
-        threading.Thread(
-            target=send_email_in_background,
-            args=(subject, message, from_email, recipient_list)
-        ).start()
+        send_announcement_email(subject, message, from_email, recipient_list)
 
 @receiver(post_save, sender=Event)
 def notify_members_new_event(sender, instance, created, **kwargs):
     if created:
         recipient_list = list(User.objects.filter(
-            is_active=True, 
+            is_active=True,
             profile__email_notifications=True
         ).values_list('email', flat=True))
-        
+
         recipient_list = [email for email in recipient_list if email]
-        if not recipient_list: 
+        if not recipient_list:
             return
 
         author_name = instance.created_by.get_full_name() or instance.created_by.username
@@ -76,7 +82,4 @@ def notify_members_new_event(sender, instance, created, **kwargs):
         message = f"{author_name} added an event: {instance.title}\nWhen: {start_str}\n\n{instance.description}"
         from_email = f"SportsCIO <{settings.DEFAULT_FROM_EMAIL}>"
 
-        threading.Thread(
-            target=send_email_in_background,
-            args=(subject, message, from_email, recipient_list)
-        ).start()
+        send_event_email(subject, message, from_email, recipient_list)
