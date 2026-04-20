@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django_q",
     "storages",
     "sportscio.apps.SportscioConfig",
     "django.contrib.sites",
@@ -168,3 +169,11 @@ else:
     EMAIL_HOST_USER = os.environ.get("GMAIL_USER") # e.g., yourname@gmail.com
     EMAIL_HOST_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD") # Your 16-character App Password
     DEFAULT_FROM_EMAIL = os.environ.get("GMAIL_USER")
+
+Q_CLUSTER = {
+    'name': 'SportsCIOQueue',
+    'orm': 'default',  # Use Django's default database
+    'workers': 1,      # Heroku free/mini dynos handle 1 worker best
+    'timeout': 60,
+    'retry': 120,
+}
