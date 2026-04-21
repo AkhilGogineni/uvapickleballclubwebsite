@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign in | SportsCIO</title>
+    <title>Sign in | UVA Pickleball Club</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
@@ -52,6 +52,18 @@
             color: var(--c-mint);
             position: relative;
             z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .login-brand img {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            background: rgba(214, 229, 227, 0.12);
+            border: 1px solid rgba(159, 216, 203, 0.18);
+            object-fit: cover;
+            flex-shrink: 0;
         }
         .login-tagline {
             font-size: clamp(1.6rem, 3vw, 2.15rem);
@@ -139,8 +151,11 @@
 
 <div class="login-split">
     <section class="login-hero" aria-hidden="false">
-        <div class="login-brand">SPORTSCIO</div>
-        <p class="login-tagline">Connect with your club through one calm place for schedules, chat, and documents.</p>
+        <div class="login-brand">
+            <img src="{% static 'sportscio/uva-pickleball-logos.png' %}" alt="UVA Pickleball Club">
+            UVA PICKLEBALL
+        </div>
+        <p class="login-tagline">Serve, rally, and stay in sync — schedules, announcements, chat, and docs in one place.</p>
         <div class="login-dots" aria-hidden="true">
             <span class="on"></span><span></span><span></span>
         </div>
@@ -153,7 +168,7 @@
             Continue with Google
         </a>
         <div class="divider">Secure sign-in</div>
-        <p class="fine" style="margin:0;font-size:0.82rem;">Sports CIOs · member tools · club leader controls</p>
+        <p class="fine" style="margin:0;font-size:0.82rem;">UVA Pickleball · member tools · club leader controls</p>
     </section>
 </div>
 
