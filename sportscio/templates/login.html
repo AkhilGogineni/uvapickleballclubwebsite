@@ -72,6 +72,11 @@
             max-width: 20ch;
             position: relative;
             z-index: 1;
+            transition: opacity 220ms ease, transform 220ms ease;
+        }
+        .login-tagline.is-fading {
+            opacity: 0;
+            transform: translateY(3px);
         }
         .login-dots {
             display: flex;
@@ -155,8 +160,8 @@
             <img src="{% static 'sportscio/uva-pickleball-logo-v3.png' %}" alt="UVA Pickleball Club">
             UVA PICKLEBALL
         </div>
-        <p class="login-tagline">Serve, rally, and stay in sync — schedules, announcements, chat, and docs in one place.</p>
-        <div class="login-dots" aria-hidden="true">
+        <p class="login-tagline" id="rotating-tagline">Serve, rally, and stay in sync — schedules, announcements, chat, and docs in one place.</p>
+        <div class="login-dots" id="rotating-dots" aria-hidden="true">
             <span class="on"></span><span></span><span></span>
         </div>
     </section>
@@ -171,6 +176,39 @@
         <p class="fine" style="margin:0;font-size:0.82rem;">UVA Pickleball · member tools · club leader controls</p>
     </section>
 </div>
+
+<script>
+(() => {
+    const taglineEl = document.getElementById('rotating-tagline');
+    const dotsWrap = document.getElementById('rotating-dots');
+    if (!taglineEl || !dotsWrap) return;
+
+    const dots = Array.from(dotsWrap.querySelectorAll('span'));
+    const taglines = [
+        'Serve, rally, and stay in sync — schedules, announcements, chat, and docs in one place.',
+        'Know what’s next — practice times, tournaments, and club events in one calendar.',
+        'Message the club fast — updates, carpools, and quick questions, all in-app.',
+    ];
+
+    let i = 0;
+    const setActive = (idx) => {
+        dots.forEach((d, j) => d.classList.toggle('on', j === idx));
+        taglineEl.textContent = taglines[idx] || taglines[0];
+    };
+
+    const tick = () => {
+        i = (i + 1) % taglines.length;
+        taglineEl.classList.add('is-fading');
+        setTimeout(() => {
+            setActive(i);
+            requestAnimationFrame(() => taglineEl.classList.remove('is-fading'));
+        }, 190);
+    };
+
+    setActive(0);
+    setInterval(tick, 4200);
+})();
+</script>
 
 </body>
 </html>
