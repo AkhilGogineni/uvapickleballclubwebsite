@@ -51,6 +51,19 @@ body.theme-app {
   color: var(--c-mint);
   margin-bottom: 20px;
   padding: 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(214, 229, 227, 0.12);
+  border: 1px solid rgba(159, 216, 203, 0.18);
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .nav-item {

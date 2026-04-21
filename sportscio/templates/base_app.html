@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}SportsCIO{% endblock %}</title>
+    <title>{% block title %}UVA Pickleball Club{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&display=swap" rel="stylesheet">
@@ -14,7 +14,10 @@
 <body class="theme-app">
 <div class="app-shell">
     <aside class="sidebar" aria-label="Main navigation">
-        <div class="sidebar-brand">SportsCIO</div>
+        <div class="sidebar-brand">
+            <img class="brand-mark" src="{% static 'sportscio/uva-pickleball-logo-v3.png' %}" alt="UVA Pickleball Club" width="28" height="28">
+            <span>UVA Pickleball</span>
+        </div>
         <a class="nav-item {% if nav_active == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
             <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             Home
