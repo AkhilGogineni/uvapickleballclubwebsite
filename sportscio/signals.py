@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mass_mail
+from background_task import background
 from django_q.tasks import async_task  # <--- The Q2 worker hook
 from .models import Profile, Announcement, Event
 
