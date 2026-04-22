@@ -6,6 +6,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.db import connection
+from django.db.models import Q
 from datetime import date, datetime, time, timedelta
 import calendar as pycal
 import json
@@ -159,6 +160,23 @@ def members_view(request):
         return redirect("user_role_admin")
 
     users = User.objects.select_related("profile").order_by("username")
+
+    selected_role = request.GET.get("role")
+    search = request.GET.get("search")
+    role_aliases = {
+        "admin": Profile.ROLE_USER_ADMIN,
+        "leader": Profile.ROLE_OFFICER,
+    }
+    selected_role = role_aliases.get(selected_role, selected_role)
+    if selected_role:
+        users = users.filter(profile__role=selected_role)
+    if search:
+        users = users.filter(
+            Q(username__icontains=search) |
+            Q(first_name__icontains=search) |
+            Q(last_name__icontains=search)
+        )
+        
     return render(request, "members.html", {"users": users, "nav_active": "members"})
 
 

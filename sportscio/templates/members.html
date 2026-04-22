@@ -2,7 +2,9 @@
 {% block title %}Members | SportsCIO{% endblock %}
 {% block page_heading %}Members{% endblock %}
 {% block page_sub %}Club roster and roles.{% endblock %}
+
 {% block content %}
+
 {% if messages %}
 <ul style="list-style:none;padding:0;margin:0 0 16px;">
     {% for message in messages %}
@@ -10,6 +12,30 @@
     {% endfor %}
 </ul>
 {% endif %}
+
+<div style="margin-bottom: 20px;">
+    <form method="GET" action="" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        
+        <div>
+            <input type="text" name="search" value="{{ request.GET.search }}" placeholder="Search members..." style="padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; width: 250px;">
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center;">
+            <select name="role" style="padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; background-color: #fff; cursor: pointer;">
+                <option value="" {% if not request.GET.role %}selected{% endif %}>All Roles</option>
+                <option value="admin" {% if request.GET.role == 'admin' %}selected{% endif %}>Admin</option>
+                <option value="leader" {% if request.GET.role == 'leader' %}selected{% endif %}>Club Leader</option>
+                <option value="member" {% if request.GET.role == 'member' %}selected{% endif %}>Member</option>
+            </select>
+
+            <!-- <button type="submit" style="padding: 8px 16px; border-radius: 8px; background-color: #0f172a; color: white; border: none; cursor: pointer; font-weight: 600;">
+                Filter
+            </button> -->
+        </div>
+        
+    </form>
+</div>
+
 <div class="table-wrap">
     <table class="data-table">
         <thead>
@@ -45,4 +71,49 @@
         </tbody>
     </table>
 </div>
+
+<script>
+    // 1. Grab the important elements from the page
+    const searchInput = document.querySelector('input[name="search"]');
+    const roleSelect = document.querySelector('select[name="role"]');
+    const tableWrap = document.querySelector('.table-wrap');
+    
+    let debounceTimer;
+
+    // 2. Create the function that updates the table
+    function fetchUpdatedTable() {
+        // Grab whatever is currently typed in the search and selected in the dropdown
+        const searchValue = searchInput.value;
+        const roleValue = roleSelect.value;
+        
+        // Build the secret background URL (e.g., ?search=smith&role=admin)
+        const url = `?search=${encodeURIComponent(searchValue)}&role=${encodeURIComponent(roleValue)}`;
+
+        // Fetch the new page from Django behind the scenes
+        fetch(url)
+            .then(response => response.text())
+            .then(html => {
+                // Convert the raw HTML text into a readable document
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Extract JUST the new table from the hidden document, and swap ours out!
+                const newTable = doc.querySelector('.table-wrap').innerHTML;
+                tableWrap.innerHTML = newTable;
+                
+                // Update the browser URL without refreshing (so bookmarks still work)
+                window.history.replaceState(null, '', url);
+            });
+    }
+
+    // 3. Listen for typing in the search bar
+    searchInput.addEventListener('input', function() {
+        clearTimeout(debounceTimer); // Clear the timer if they are still typing
+        debounceTimer = setTimeout(fetchUpdatedTable, 300); // Wait 300ms after they stop, then fetch
+    });
+
+    // 4. (Bonus) Make the dropdown live-update too without a full reload!
+    roleSelect.addEventListener('change', fetchUpdatedTable);
+</script>
+
 {% endblock %}
