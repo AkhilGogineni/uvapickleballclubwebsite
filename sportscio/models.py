@@ -71,6 +71,7 @@ class Event(models.Model):
     title = models.CharField(max_length=200)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+    location = models.CharField(max_length=200, blank=True, default="")
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

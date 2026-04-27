@@ -309,6 +309,7 @@ def new_event_view(request):
         title = request.POST.get("title", "").strip()
         start_time_raw = request.POST.get("start_time", "").strip()
         end_time_raw = request.POST.get("end_time", "").strip()
+        location = request.POST.get("location", "").strip()
         description = request.POST.get("description", "").strip()
 
         start_dt = _parse_dt_local(start_time_raw)
@@ -324,6 +325,7 @@ def new_event_view(request):
                 title=title,
                 start_time=start_dt,
                 end_time=end_dt,
+                location=location[:200],
                 description=description,
             )
             return redirect("calendar")
@@ -468,6 +470,7 @@ def event_edit_view(request, event_id: int):
         title = request.POST.get("title", "").strip()
         start_dt = _parse_dt_local(request.POST.get("start_time", "").strip())
         end_dt = _parse_dt_local(request.POST.get("end_time", "").strip())
+        location = request.POST.get("location", "").strip()
         description = request.POST.get("description", "").strip()
         if not title or not start_dt or not end_dt:
             error = "Title, start time, and end time are required."
@@ -477,8 +480,9 @@ def event_edit_view(request, event_id: int):
             ev.title = title
             ev.start_time = start_dt
             ev.end_time = end_dt
+            ev.location = location[:200]
             ev.description = description
-            ev.save(update_fields=["title", "start_time", "end_time", "description"])
+            ev.save(update_fields=["title", "start_time", "end_time", "location", "description"])
             django_messages.success(request, "Event updated.")
             return redirect("calendar")
 

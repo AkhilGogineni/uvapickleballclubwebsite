@@ -30,7 +30,10 @@
             {% for e in events %}
             <li class="event-row">
                 <strong>{{ e.title }}</strong>
-                <span>{{ e.start_time|date:"M j, Y g:i A" }} — {{ e.end_time|date:"g:i A" }}</span>
+                <span>
+                    {{ e.start_time|date:"M j, Y g:i A" }} — {{ e.end_time|date:"g:i A" }}
+                    {% if e.location %} · {{ e.location }}{% endif %}
+                </span>
             </li>
             {% endfor %}
         </ul>

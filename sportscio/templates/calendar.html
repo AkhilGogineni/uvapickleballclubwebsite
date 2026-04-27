@@ -139,6 +139,7 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        cursor: pointer;
     }
     .cal-event .evt-actions {
         display: none;
@@ -158,6 +159,11 @@
         font-weight: 800;
     }
     .evt-actions a:hover, .evt-actions button:hover { color: var(--c-ink); }
+
+    /* Event details popover (Google Calendar-style, simple) */
+    .evt-details-row { display:flex; gap:12px; align-items:flex-start; margin: 10px 0 0; }
+    .evt-details-ico { width: 28px; height: 28px; border-radius: 10px; display:flex; align-items:center; justify-content:center; background: rgba(159, 216, 203, 0.22); color: var(--c-forest); font-weight: 900; flex-shrink: 0; }
+    .evt-details-row .muted { margin: 0; }
     .cal-event:nth-child(3n+2) {
         background: rgba(202, 207, 214, 0.65);
         border-left-color: #5a7a6c;
@@ -216,8 +222,13 @@
             <div class="cal-day-num">{{ day.date.day }}</div>
             <div class="cal-day-events">
                 {% for e in day.events|slice:":4" %}
-                <div class="cal-event" title="{{ e.title }} — {{ e.start_time|date:'M j, g:i A' }} to {{ e.end_time|date:'g:i A' }}{% if e.description %} — {{ e.description|truncatewords:20 }}{% endif %}">
-                    <div class="evt-main">
+                <div class="cal-event"
+                     data-evt-title="{{ e.title|escape }}"
+                     data-evt-start="{{ e.start_time|date:'c' }}"
+                     data-evt-end="{{ e.end_time|date:'c' }}"
+                     data-evt-location="{{ e.location|default:''|escape }}"
+                     title="{{ e.title }} — {{ e.start_time|date:'M j, g:i A' }} to {{ e.end_time|date:'g:i A' }}{% if e.location %} — {{ e.location }}{% endif %}{% if e.description %} — {{ e.description|truncatewords:20 }}{% endif %}">
+                    <div class="evt-main" role="button" tabindex="0" aria-label="View event details">
                         <span class="cal-event-time">{{ e.start_time|date:"g:i A" }}</span>{{ e.title|truncatechars:20 }}
                     </div>
                     {% if is_privileged %}
@@ -240,4 +251,98 @@
     </div>
     {% endfor %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<div class="modal-overlay" id="evt-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="evt-title">
+        <div class="modal-head" style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+            <h3 id="evt-title" style="margin:0;">Event</h3>
+            <button type="button" class="btn-secondary" id="evt-close" style="padding:8px 12px; border-radius:12px;">×</button>
+        </div>
+        <div class="modal-body">
+            <div class="evt-details-row">
+                <div class="evt-details-ico">🗓</div>
+                <p class="muted" id="evt-when" style="font-size:0.95rem;"></p>
+            </div>
+            <div class="evt-details-row">
+                <div class="evt-details-ico">📍</div>
+                <p class="muted" id="evt-where" style="font-size:0.95rem;"></p>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button type="button" class="btn-secondary" id="evt-ok">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    const overlay = document.getElementById('evt-overlay');
+    const titleEl = document.getElementById('evt-title');
+    const whenEl = document.getElementById('evt-when');
+    const whereEl = document.getElementById('evt-where');
+    const closeBtn = document.getElementById('evt-close');
+    const okBtn = document.getElementById('evt-ok');
+    if (!overlay || !titleEl || !whenEl || !whereEl || !closeBtn || !okBtn) return;
+
+    const DISPLAY_TZ = 'America/New_York';
+
+    function open() {
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden', 'false');
+        okBtn.focus();
+    }
+    function close() {
+        overlay.classList.remove('open');
+        overlay.setAttribute('aria-hidden', 'true');
+    }
+
+    function fmtRange(startIso, endIso) {
+        const start = new Date(startIso);
+        const end = new Date(endIso);
+        const date = start.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: DISPLAY_TZ });
+        const t1 = start.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', timeZone: DISPLAY_TZ });
+        const t2 = end.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', timeZone: DISPLAY_TZ });
+        return `${date} · ${t1} – ${t2}`;
+    }
+
+    function handleOpenFromChip(chip) {
+        const title = chip.dataset.evtTitle || 'Event';
+        const startIso = chip.dataset.evtStart;
+        const endIso = chip.dataset.evtEnd;
+        const loc = (chip.dataset.evtLocation || '').trim();
+
+        titleEl.textContent = title;
+        whenEl.textContent = (startIso && endIso) ? fmtRange(startIso, endIso) : '';
+        whereEl.textContent = loc || 'Location TBD';
+        open();
+    }
+
+    document.addEventListener('click', (e) => {
+        const main = e.target.closest('.cal-event .evt-main');
+        if (!main) return;
+        // Prevent opening when clicking edit/delete controls
+        if (e.target.closest('.evt-actions')) return;
+        const chip = main.closest('.cal-event');
+        if (!chip) return;
+        handleOpenFromChip(chip);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.classList.contains('open')) close();
+        if ((e.key === 'Enter' || e.key === ' ') && e.target && e.target.classList && e.target.classList.contains('evt-main')) {
+            e.preventDefault();
+            const chip = e.target.closest('.cal-event');
+            if (chip) handleOpenFromChip(chip);
+        }
+    });
+
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) close();
+    });
+    closeBtn.addEventListener('click', close);
+    okBtn.addEventListener('click', close);
+})();
+</script>
 {% endblock %}

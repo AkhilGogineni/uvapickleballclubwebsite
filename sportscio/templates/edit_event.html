@@ -36,6 +36,10 @@
       <input type="datetime-local" id="end_time" name="end_time" required value="{{ event.end_time|date:'Y-m-d\\TH:i' }}">
     </div>
     <div class="field">
+      <label for="location">Location</label>
+      <input type="text" id="location" name="location" maxlength="200" value="{{ event.location }}" placeholder="e.g. Mem Gym Court 2">
+    </div>
+    <div class="field">
       <label for="description">Description</label>
       <textarea id="description" name="description">{{ event.description }}</textarea>
     </div>
