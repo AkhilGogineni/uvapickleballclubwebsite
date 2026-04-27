@@ -19,10 +19,23 @@
     .day-heading:first-child { margin-top: 4px; }
     .msg-with-meta { display: grid; grid-template-columns: 1fr 0; gap: 4px 8px; align-items: end; margin-bottom: 4px; transition: grid-template-columns 0.22s ease; }
     .phone-chat-shell.reveal-times .msg-with-meta { grid-template-columns: 1fr 54px; }
-    .bubble-col { display: flex; flex-direction: column; min-width: 0; max-width: min(82%, 640px); }
+    .bubble-col { display: flex; flex-direction: column; min-width: 0; max-width: min(86%, 720px); }
     .msg-with-meta.is-own .bubble-col { margin-left: auto; align-items: flex-end; }
     .msg-with-meta:not(.is-own) .bubble-col { margin-right: auto; align-items: flex-start; }
-    .sender-pill { font-size: 0.68rem; font-weight: 700; color: var(--c-forest); margin: 0; opacity: 0.92; }
+    .peer-row { display: flex; gap: 10px; align-items: flex-end; }
+    .peer-avatar {
+        width: 34px; height: 34px; border-radius: 50%;
+        background: rgba(214, 229, 227, 0.55);
+        border: 1px solid rgba(81, 118, 100, 0.18);
+        color: var(--c-ink);
+        display: flex; align-items: center; justify-content: center;
+        font-weight: 800; font-size: 0.72rem;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+    .peer-avatar img { width: 100%; height: 100%; object-fit: cover; display:block; }
+    .peer-stack { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .sender-pill { font-size: 0.70rem; font-weight: 800; color: #111827; margin: 0 0 0 2px; opacity: 0.92; }
     .bubble { padding: 10px 14px; border-radius: 18px; line-height: 1.5; word-wrap: break-word; font-size: 1.02rem; }
     .msg-with-meta.is-own .bubble { background: linear-gradient(155deg, var(--c-forest) 0%, #355749 55%, #2a3f38 100%); color: var(--c-white); border-bottom-right-radius: 4px; box-shadow: 0 1px 3px rgba(45, 51, 25, 0.18); }
     .msg-with-meta:not(.is-own) .bubble { background: linear-gradient(155deg, var(--c-mist) 0%, var(--c-mint) 55%, #8ec9bc 100%); color: var(--c-ink); border: 1px solid rgba(81, 118, 100, 0.22); border-bottom-left-radius: 4px; box-shadow: 0 1px 2px rgba(45, 51, 25, 0.08); }
@@ -48,18 +61,24 @@
         <div class="msg-with-meta {% if message.sender == user %}is-own{% endif %}" data-day-key="{{ message.timestamp|date:'Y-m-d' }}" data-iso="{{ message.timestamp|date:'c' }}">
             <div class="bubble-col">
                 {% if message.sender != user %}
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-                    {% if message.sender.profile.avatar %}
-                        <img src="{{ message.sender.profile.avatar.url }}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
-                    {% else %}
-                        <div style="width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #64748b; font-weight: 700;">
-                            {{ message.sender.first_name|default:message.sender.username|slice:":1"|upper }}
-                        </div>
-                    {% endif %}
-                    <span class="sender-pill">{{ message.sender.get_full_name|default:message.sender.username }}</span>
+                <div class="peer-row">
+                    <div class="peer-avatar" aria-hidden="true">
+                        {% if message.sender.profile.avatar %}
+                            <img src="{{ message.sender.profile.avatar.url }}" alt="">
+                        {% else %}
+                            {% with fi=message.sender.first_name|default:message.sender.username|slice:":1"|upper li=message.sender.last_name|slice:":1"|upper %}
+                                {{ fi }}{% if li %}{{ li }}{% endif %}
+                            {% endwith %}
+                        {% endif %}
+                    </div>
+                    <div class="peer-stack">
+                        <div class="sender-pill">{{ message.sender.get_full_name|default:message.sender.username }}</div>
+                        <div class="bubble">{{ message.content|linebreaksbr }}</div>
+                    </div>
                 </div>
-                {% endif %}
+                {% else %}
                 <div class="bubble">{{ message.content|linebreaksbr }}</div>
+                {% endif %}
             </div>
             <div class="time-rail"><span>{{ message.timestamp|date:"g:i A" }}</span></div>
         </div>
@@ -146,23 +165,44 @@
         bubbleCol.className = 'bubble-col';
         
         if (!own) {
-            const header = document.createElement('div');
-            header.style = "display: flex; align-items: center; gap: 8px; margin-bottom: 4px;";
-            if (data.avatar_url) {
-                header.innerHTML = `<img src="${data.avatar_url}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">`;
-            } else {
-                const initial = (data.first_name || data.username || 'M').charAt(0).toUpperCase();
-                header.innerHTML = `<div style="width: 24px; height: 24px; border-radius: 50%; background: #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #64748b; font-weight: 700;">${initial}</div>`;
-            }
-            const pill = document.createElement('span'); pill.className = 'sender-pill';
-            pill.textContent = data.display_name || 'Member';
-            header.appendChild(pill);
-            bubbleCol.appendChild(header);
-        }
+            const peerRow = document.createElement('div');
+            peerRow.className = 'peer-row';
 
-        const bubble = document.createElement('div');
-        bubble.className = 'bubble'; bubble.innerHTML = nlToBr(data.message);
-        bubbleCol.appendChild(bubble);
+            const av = document.createElement('div');
+            av.className = 'peer-avatar';
+            if (data.avatar_url) {
+                av.innerHTML = `<img src="${escapeHtml(data.avatar_url)}" alt="">`;
+            } else {
+                const fn = (data.first_name || '').trim();
+                const ln = (data.last_name || '').trim();
+                const uname = (data.username || 'M').trim();
+                const fi = (fn || uname).charAt(0).toUpperCase();
+                const li = (ln || '').charAt(0).toUpperCase();
+                av.textContent = (fi + (li ? li : '')).slice(0, 2);
+            }
+
+            const stack = document.createElement('div');
+            stack.className = 'peer-stack';
+
+            const name = document.createElement('div');
+            name.className = 'sender-pill';
+            name.textContent = data.display_name || data.username || 'Member';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.innerHTML = nlToBr(data.message);
+
+            stack.appendChild(name);
+            stack.appendChild(bubble);
+            peerRow.appendChild(av);
+            peerRow.appendChild(stack);
+            bubbleCol.appendChild(peerRow);
+        } else {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            bubble.innerHTML = nlToBr(data.message);
+            bubbleCol.appendChild(bubble);
+        }
 
         const rail = document.createElement('div');
         rail.className = 'time-rail'; rail.innerHTML = '<span>' + escapeHtml(clockFromIso(iso)) + '</span>';

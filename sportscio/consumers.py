@@ -42,6 +42,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         'message': message_content,
                         'username': self.user.username,
                         'first_name': self.user.first_name,
+                        'last_name': self.user.last_name,
                         'display_name': self.user.get_full_name() or self.user.username,
                         'avatar_url': avatar_url,
                         'timestamp': db_message.timestamp.isoformat(),
