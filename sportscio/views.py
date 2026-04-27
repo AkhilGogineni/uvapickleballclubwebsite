@@ -29,6 +29,57 @@ def _parse_dt_local(value: str):
     return dt
 
 
+def _validate_event_not_in_past(start_dt, end_dt):
+    """Return an error string if start/end are not strictly in the future, else None."""
+    now = timezone.now()
+    if start_dt < now:
+        return "Start time cannot be in the past."
+    if end_dt < now:
+        return "End time cannot be in the past."
+    return None
+
+
+class CalendarEventChip:
+    """One calendar cell row: real Event bounds plus times clipped to that local calendar day."""
+
+    __slots__ = (
+        "id",
+        "title",
+        "description",
+        "location",
+        "event_type",
+        "start_time",
+        "end_time",
+        "segment_start",
+        "segment_end",
+    )
+
+    def __init__(
+        self,
+        event: Event,
+        segment_start,
+        segment_end,
+    ):
+        self.id = event.id
+        self.title = event.title
+        self.description = event.description
+        self.location = event.location
+        self.event_type = event.event_type
+        self.start_time = event.start_time
+        self.end_time = event.end_time
+        self.segment_start = segment_start
+        self.segment_end = segment_end
+
+
+def _calendar_chip_for_day(event: Event, day: date):
+    """Clip event to local [day 00:00, day 23:59:59.999999] for display on that grid cell."""
+    day_start = timezone.make_aware(datetime.combine(day, time.min))
+    day_end = timezone.make_aware(datetime.combine(day, time.max))
+    seg_start = max(event.start_time, day_start)
+    seg_end = min(event.end_time, day_end)
+    return CalendarEventChip(event, seg_start, seg_end)
+
+
 @login_required
 def home(request):
     if is_user_admin(request.user):
@@ -119,8 +170,11 @@ def calendar_view(request):
         d = max(sd, first_day)
         end = min(ed, last_day)
         while d <= end:
-            by_day.setdefault(d.isoformat(), []).append(e)
+            by_day.setdefault(d.isoformat(), []).append(_calendar_chip_for_day(e, d))
             d += timedelta(days=1)
+
+    for key, lst in by_day.items():
+        lst.sort(key=lambda chip: (chip.segment_start, chip.start_time))
 
     cal = pycal.Calendar(firstweekday=pycal.SUNDAY)
     weeks = cal.monthdatescalendar(y, m)
@@ -321,16 +375,18 @@ def new_event_view(request):
         elif end_dt <= start_dt:
             error = "End time must be after start time."
         else:
-            Event.objects.create(
-                created_by=request.user,
-                title=title,
-                start_time=start_dt,
-                end_time=end_dt,
-                location=location[:200],
-                event_type=event_type[:32],
-                description=description,
-            )
-            return redirect("calendar")
+            error = _validate_event_not_in_past(start_dt, end_dt)
+            if error is None:
+                Event.objects.create(
+                    created_by=request.user,
+                    title=title,
+                    start_time=start_dt,
+                    end_time=end_dt,
+                    location=location[:200],
+                    event_type=event_type[:32],
+                    description=description,
+                )
+                return redirect("calendar")
     return render(
         request,
         "new_event.html",
@@ -480,15 +536,17 @@ def event_edit_view(request, event_id: int):
         elif end_dt <= start_dt:
             error = "End time must be after start time."
         else:
-            ev.title = title
-            ev.start_time = start_dt
-            ev.end_time = end_dt
-            ev.location = location[:200]
-            ev.event_type = event_type[:32]
-            ev.description = description
-            ev.save(update_fields=["title", "start_time", "end_time", "location", "event_type", "description"])
-            django_messages.success(request, "Event updated.")
-            return redirect("calendar")
+            error = _validate_event_not_in_past(start_dt, end_dt)
+            if error is None:
+                ev.title = title
+                ev.start_time = start_dt
+                ev.end_time = end_dt
+                ev.location = location[:200]
+                ev.event_type = event_type[:32]
+                ev.description = description
+                ev.save(update_fields=["title", "start_time", "end_time", "location", "event_type", "description"])
+                django_messages.success(request, "Event updated.")
+                return redirect("calendar")
 
     return render(
         request,

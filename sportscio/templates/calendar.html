@@ -281,13 +281,15 @@
                 {% for e in day.events|slice:":4" %}
                 <div class="cal-event type-{{ e.event_type|default:'' }}"
                      data-evt-title="{{ e.title|escape }}"
-                     data-evt-start="{{ e.start_time|date:'c' }}"
-                     data-evt-end="{{ e.end_time|date:'c' }}"
+                     data-evt-full-start="{{ e.start_time|date:'c' }}"
+                     data-evt-full-end="{{ e.end_time|date:'c' }}"
+                     data-evt-start="{{ e.segment_start|date:'c' }}"
+                     data-evt-end="{{ e.segment_end|date:'c' }}"
                      data-evt-location="{{ e.location|default:''|escape }}"
                      data-evt-type="{{ e.event_type|default:''|escape }}"
-                     title="{{ e.title }} — {{ e.start_time|date:'M j, g:i A' }} to {{ e.end_time|date:'g:i A' }}{% if e.location %} — {{ e.location }}{% endif %}{% if e.description %} — {{ e.description|truncatewords:20 }}{% endif %}">
+                     title="{{ e.title }} — {{ e.start_time|date:'M j, g:i A' }} to {{ e.end_time|date:'M j, g:i A' }}{% if e.location %} — {{ e.location }}{% endif %}{% if e.description %} — {{ e.description|truncatewords:20 }}{% endif %}">
                     <div class="evt-main" role="button" tabindex="0" aria-label="View event details">
-                        <span class="cal-event-time">{{ e.start_time|date:"g:i A" }}</span>{{ e.title|truncatechars:20 }}
+                        <span class="cal-event-time">{% if e.segment_start.date == e.segment_end.date %}{{ e.segment_start|date:"g:i A" }}–{{ e.segment_end|date:"g:i A" }}{% else %}{{ e.segment_start|date:"M j, g:i A" }} – {{ e.segment_end|date:"M j, g:i A" }}{% endif %}</span>{{ e.title|truncatechars:20 }}
                     </div>
                     {% if is_privileged %}
                     <div class="evt-actions" aria-label="Event actions">
@@ -425,8 +427,8 @@
 
     function handleOpenFromChip(chip) {
         const title = chip.dataset.evtTitle || 'Event';
-        const startIso = chip.dataset.evtStart;
-        const endIso = chip.dataset.evtEnd;
+        const startIso = chip.dataset.evtFullStart || chip.dataset.evtStart;
+        const endIso = chip.dataset.evtFullEnd || chip.dataset.evtEnd;
         const loc = (chip.dataset.evtLocation || '').trim();
 
         titleEl.textContent = title;
