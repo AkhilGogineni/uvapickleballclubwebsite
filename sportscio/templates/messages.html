@@ -100,16 +100,29 @@
     }
     function nlToBr(s) { return escapeHtml(s).replace(/\n/g, '<br>'); }
 
+    // Keep display consistent with server (settings.TIME_ZONE = America/New_York): always format in ET.
+    const DISPLAY_TZ = 'America/New_York';
     function dayKeyFromIso(iso) {
         const d = new Date(iso);
-        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+        const parts = new Intl.DateTimeFormat('en-CA', { timeZone: DISPLAY_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(d);
+        const byType = Object.fromEntries(parts.map(p => [p.type, p.value]));
+        return `${byType.year}-${byType.month}-${byType.day}`;
     }
-    function clockFromIso(iso) { return new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }); }
+    function clockFromIso(iso) {
+        return new Date(iso).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', timeZone: DISPLAY_TZ });
+    }
     function dayHeadingFromIso(iso) {
-        const d = new Date(iso); const start = new Date(d); start.setHours(0,0,0,0);
-        const today = new Date(); today.setHours(0,0,0,0); const diff = (today - start) / 864e5;
-        if (diff === 0) return 'Today'; if (diff === 1) return 'Yesterday';
-        return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        const d = new Date(iso);
+        const dayKey = dayKeyFromIso(iso);
+        const todayKey = dayKeyFromIso(new Date().toISOString());
+        if (dayKey === todayKey) return 'Today';
+        // compute yesterday in DISPLAY_TZ
+        const now = new Date();
+        const yParts = new Intl.DateTimeFormat('en-CA', { timeZone: DISPLAY_TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date(now.getTime() - 864e5));
+        const yByType = Object.fromEntries(yParts.map(p => [p.type, p.value]));
+        const yesterdayKey = `${yByType.year}-${yByType.month}-${yByType.day}`;
+        if (dayKey === yesterdayKey) return 'Yesterday';
+        return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric', timeZone: DISPLAY_TZ });
     }
 
     function appendIncoming(data) {

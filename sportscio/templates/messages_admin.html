@@ -124,7 +124,8 @@
         bubbleCol.appendChild(bubble);
 
         const rail = document.createElement('div');
-        rail.className = 'time-rail'; rail.innerHTML = `<span>${new Date(iso).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'})}</span>`;
+        // Keep consistent with server (America/New_York) to avoid time-jump confusion.
+        rail.className = 'time-rail'; rail.innerHTML = `<span>${new Date(iso).toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit', timeZone:'America/New_York'})}</span>`;
 
         row.appendChild(bubbleCol); row.appendChild(rail);
         messageList.appendChild(row);

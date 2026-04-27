@@ -49,7 +49,9 @@ INSTALLED_APPS = [
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
         "SCOPE": ["profile", "email"],
-        "AUTH_PARAMS": {"access_type": "online"},
+        # Force Google to show the account chooser each time.
+        # Prevents "logged out, but it logs back into the other Google account" confusion.
+        "AUTH_PARAMS": {"access_type": "online", "prompt": "select_account"},
     }
 }
 
@@ -117,7 +119,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "UTC"
+# App is currently only used in US/Eastern.
+# Django still stores datetimes in UTC when USE_TZ=True, but template display/localtime uses this TZ.
+TIME_ZONE = "America/New_York"
 USE_I18N = True
 USE_TZ = True
 
