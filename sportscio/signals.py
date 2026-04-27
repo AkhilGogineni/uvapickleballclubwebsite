@@ -2,11 +2,46 @@ import os
 from datetime import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.utils.text import slugify
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mass_mail
 from django_q.tasks import async_task  # <--- The Q2 worker hook
+from allauth.account.signals import user_signed_up
 from .models import Profile, Announcement, Event
+
+def _make_unique_username(base: str) -> str:
+    base = slugify(base or "")[:30].strip("-_") or "member"
+    candidate = base
+    i = 2
+    while User.objects.filter(username=candidate).exists():
+        suffix = f"-{i}"
+        candidate = (base[: max(1, 30 - len(suffix))] + suffix).strip("-_")
+        i += 1
+    return candidate
+
+@receiver(user_signed_up)
+def set_username_on_social_signup(request, user, **kwargs):
+    """
+    Ensure username is always a clean, unique handle on first Google signup.
+    Falls back to email local-part, then full name.
+    """
+    # allauth typically sets something, but it can be odd/blank depending on provider/user profile.
+    current = (user.username or "").strip()
+    email = (user.email or "").strip()
+    base = ""
+
+    if email and "@" in email:
+        base = email.split("@", 1)[0]
+    elif user.get_full_name().strip():
+        base = user.get_full_name()
+    else:
+        base = current or "member"
+
+    # If username is blank or looks email-ish, normalize it.
+    if (not current) or ("@" in current) or (current.lower() in {"user", "member"}):
+        user.username = _make_unique_username(base)
+        user.save(update_fields=["username"])
 
 def send_email_in_background(subject, message, from_email, recipient_list):
     """

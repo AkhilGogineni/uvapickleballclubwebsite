@@ -10,6 +10,18 @@
     {% endfor %}
 </ul>
 {% endif %}
+<div class="card" style="padding:16px 18px; margin-bottom:16px;">
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        <div style="flex:1; min-width:220px;">
+            <label for="member-search" class="muted" style="display:block; font-size:0.82rem; margin-bottom:6px;">Search members</label>
+            <input id="member-search" type="text" placeholder="Start typing a name or email…" autocomplete="off"
+                   style="width:100%; padding:10px 12px; border-radius:14px; border:1px solid rgba(81,118,100,0.25); font:inherit;">
+        </div>
+        <div class="muted" style="font-size:0.9rem; white-space:nowrap; padding-top:18px;">
+            <span id="member-count"></span>
+        </div>
+    </div>
+</div>
 <div class="table-wrap">
     <table class="data-table">
         <thead>
@@ -21,7 +33,10 @@
         </thead>
         <tbody>
             {% for u in users %}
-            <tr>
+            <tr class="member-row"
+                data-name="{{ u.get_full_name|default:u.username|lower }}"
+                data-email="{{ u.email|default:''|lower }}"
+                data-username="{{ u.username|lower }}">
                 <td style="display: flex; align-items: center; gap: 12px;">
                     {% if u.profile.avatar %}
                         <img src="{{ u.profile.avatar.url }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
@@ -45,4 +60,40 @@
         </tbody>
     </table>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(() => {
+    const input = document.getElementById('member-search');
+    const rows = Array.from(document.querySelectorAll('.member-row'));
+    const countEl = document.getElementById('member-count');
+    if (!input || !countEl) return;
+
+    const setCount = (n) => { countEl.textContent = `${n} shown`; };
+    const norm = (s) => (s || '').trim().toLowerCase();
+
+    function applyFilter() {
+        const q = norm(input.value);
+        let shown = 0;
+        for (const r of rows) {
+            if (!q) {
+                r.style.display = '';
+                shown++;
+                continue;
+            }
+            const name = r.dataset.name || '';
+            const email = r.dataset.email || '';
+            const username = r.dataset.username || '';
+            const hit = name.startsWith(q) || email.startsWith(q) || username.startsWith(q);
+            r.style.display = hit ? '' : 'none';
+            if (hit) shown++;
+        }
+        setCount(shown);
+    }
+
+    input.addEventListener('input', applyFilter);
+    setCount(rows.length);
+})();
+</script>
 {% endblock %}
