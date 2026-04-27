@@ -129,7 +129,35 @@
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
     }
+    .cal-event .evt-main {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+    .cal-event .evt-actions {
+        display: none;
+        gap: 6px;
+        flex-shrink: 0;
+        align-items: center;
+    }
+    .cal-event:hover .evt-actions { display: inline-flex; }
+    .evt-actions a, .evt-actions button {
+        font: inherit;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        padding: 0 2px;
+        color: rgba(45, 51, 25, 0.75);
+        text-decoration: none;
+        font-weight: 800;
+    }
+    .evt-actions a:hover, .evt-actions button:hover { color: var(--c-ink); }
     .cal-event:nth-child(3n+2) {
         background: rgba(202, 207, 214, 0.65);
         border-left-color: #5a7a6c;
@@ -189,7 +217,18 @@
             <div class="cal-day-events">
                 {% for e in day.events|slice:":4" %}
                 <div class="cal-event" title="{{ e.title }} — {{ e.start_time|date:'M j, g:i A' }} to {{ e.end_time|date:'g:i A' }}{% if e.description %} — {{ e.description|truncatewords:20 }}{% endif %}">
-                    <span class="cal-event-time">{{ e.start_time|date:"g:i A" }}</span>{{ e.title|truncatechars:20 }}
+                    <div class="evt-main">
+                        <span class="cal-event-time">{{ e.start_time|date:"g:i A" }}</span>{{ e.title|truncatechars:20 }}
+                    </div>
+                    {% if is_privileged %}
+                    <div class="evt-actions" aria-label="Event actions">
+                        <a href="{% url 'event_edit' e.id %}" title="Edit">✎</a>
+                        <form method="post" action="{% url 'event_delete' e.id %}" style="display:inline;" data-confirm="Delete this event?">
+                            {% csrf_token %}
+                            <button type="submit" title="Delete">🗑</button>
+                        </form>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endfor %}
                 {% if day.events|length > 4 %}

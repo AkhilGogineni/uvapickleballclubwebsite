@@ -6,11 +6,27 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.db import connection
+from django.shortcuts import get_object_or_404
 from datetime import date, datetime, time, timedelta
 import calendar as pycal
 import json
 from .models import ClubDocument, Message, Announcement, Event, Profile
 from .permissions import is_officer, is_user_admin, is_privileged
+
+
+def _parse_dt_local(value: str):
+    """
+    Parse <input type="datetime-local"> value into an aware datetime in the current TIME_ZONE.
+    """
+    if not value:
+        return None
+    try:
+        dt = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    if timezone.is_naive(dt):
+        return timezone.make_aware(dt)
+    return dt
 
 
 @login_required
@@ -291,20 +307,23 @@ def new_event_view(request):
 
     if request.method == "POST":
         title = request.POST.get("title", "").strip()
-        start_time = request.POST.get("start_time", "").strip()
-        end_time = request.POST.get("end_time", "").strip()
+        start_time_raw = request.POST.get("start_time", "").strip()
+        end_time_raw = request.POST.get("end_time", "").strip()
         description = request.POST.get("description", "").strip()
 
-        if not title or not start_time or not end_time:
+        start_dt = _parse_dt_local(start_time_raw)
+        end_dt = _parse_dt_local(end_time_raw)
+
+        if not title or not start_dt or not end_dt:
             error = "Title, start time, and end time are required."
-        elif end_time <= start_time:
+        elif end_dt <= start_dt:
             error = "End time must be after start time."
         else:
             Event.objects.create(
                 created_by=request.user,
                 title=title,
-                start_time=start_time,
-                end_time=end_time,
+                start_time=start_dt,
+                end_time=end_dt,
                 description=description,
             )
             return redirect("calendar")
@@ -435,3 +454,128 @@ def get_announcements(request):
         "id", "title", "content", "content", "author__username", "created_at"
     )
     return JsonResponse(list(announcements), safe=False)
+
+
+@login_required
+@user_passes_test(is_privileged)
+def event_edit_view(request, event_id: int):
+    if is_user_admin(request.user):
+        return redirect("user_role_admin")
+    ev = get_object_or_404(Event, pk=event_id)
+    error = None
+
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        start_dt = _parse_dt_local(request.POST.get("start_time", "").strip())
+        end_dt = _parse_dt_local(request.POST.get("end_time", "").strip())
+        description = request.POST.get("description", "").strip()
+        if not title or not start_dt or not end_dt:
+            error = "Title, start time, and end time are required."
+        elif end_dt <= start_dt:
+            error = "End time must be after start time."
+        else:
+            ev.title = title
+            ev.start_time = start_dt
+            ev.end_time = end_dt
+            ev.description = description
+            ev.save(update_fields=["title", "start_time", "end_time", "description"])
+            django_messages.success(request, "Event updated.")
+            return redirect("calendar")
+
+    return render(
+        request,
+        "edit_event.html",
+        {"nav_active": "calendar", "event": ev, "error": error},
+    )
+
+
+@login_required
+@user_passes_test(is_privileged)
+@require_http_methods(["POST"])
+def event_delete_view(request, event_id: int):
+    if is_user_admin(request.user):
+        return redirect("user_role_admin")
+    ev = get_object_or_404(Event, pk=event_id)
+    ev.delete()
+    django_messages.success(request, "Event deleted.")
+    return redirect("calendar")
+
+
+@login_required
+@user_passes_test(is_privileged)
+def announcement_edit_view(request, announcement_id: int):
+    if is_user_admin(request.user):
+        return redirect("user_role_admin")
+    ann = get_object_or_404(Announcement, pk=announcement_id)
+    error = None
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        content = request.POST.get("content", "").strip()
+        if not title or not content:
+            error = "Title and content are required."
+        else:
+            ann.title = title[:200]
+            ann.content = content
+            ann.save(update_fields=["title", "content"])
+            django_messages.success(request, "Announcement updated.")
+            return redirect("announcements")
+    return render(
+        request,
+        "edit_announcement.html",
+        {"nav_active": "announcements", "announcement": ann, "error": error},
+    )
+
+
+@login_required
+@user_passes_test(is_privileged)
+@require_http_methods(["POST"])
+def announcement_delete_view(request, announcement_id: int):
+    if is_user_admin(request.user):
+        return redirect("user_role_admin")
+    ann = get_object_or_404(Announcement, pk=announcement_id)
+    ann.delete()
+    django_messages.success(request, "Announcement deleted.")
+    return redirect("announcements")
+
+
+@login_required
+@user_passes_test(is_privileged)
+def document_edit_view(request, document_id: int):
+    if is_user_admin(request.user):
+        return redirect("user_role_admin")
+    doc = get_object_or_404(ClubDocument, pk=document_id)
+    error = None
+    if request.method == "POST":
+        title = request.POST.get("title", "").strip()
+        upload = request.FILES.get("file")
+        if not title:
+            error = "Title is required."
+        else:
+            doc.title = title[:200]
+            if upload:
+                max_bytes = 15 * 1024 * 1024
+                if upload.size > max_bytes:
+                    error = "File must be 15MB or smaller."
+                else:
+                    doc.file = upload
+            if not error:
+                doc.save()
+                django_messages.success(request, "Document updated.")
+                return redirect("documents")
+    return render(
+        request,
+        "edit_document.html",
+        {"nav_active": "documents", "document": doc, "error": error},
+    )
+
+
+@login_required
+@user_passes_test(is_privileged)
+@require_http_methods(["POST"])
+def document_delete_view(request, document_id: int):
+    if is_user_admin(request.user):
+        return redirect("user_role_admin")
+    doc = get_object_or_404(ClubDocument, pk=document_id)
+    doc.delete()
+    django_messages.success(request, "Document deleted.")
+    return redirect("documents")

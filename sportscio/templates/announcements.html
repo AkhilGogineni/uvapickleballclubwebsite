@@ -7,8 +7,11 @@
     .announcement-card { background: var(--c-white); border: 1px solid rgba(202, 207, 214, 0.8); border-radius: 18px; padding: 20px 22px; margin-bottom: 16px; box-shadow: var(--shadow-soft); }
     .announcement-card h3 { margin: 0 0 10px; color: var(--c-forest); font-size: 1.15rem; }
     .announcement-card p { margin: 0 0 12px; color: #3d4a42; line-height: 1.55; }
-    .announcement-meta { font-size: 0.85rem; color: #6b7a72; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(202, 207, 214, 0.7); padding-top: 12px; }
+    .announcement-meta { font-size: 0.85rem; color: #6b7a72; display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid rgba(202, 207, 214, 0.7); padding-top: 12px; flex-wrap: wrap; }
     .meta-author { display: flex; align-items: center; gap: 8px; }
+    .meta-actions { display: inline-flex; gap: 10px; align-items: center; }
+    .meta-actions a { color: var(--c-forest); font-weight: 800; text-decoration: none; }
+    .meta-actions a:hover { text-decoration: underline; }
     /* Fixed Avatar Styles */
     .meta-avatar {
         width: 24px; 
@@ -74,7 +77,16 @@
                     {% endif %}
                     <span>{{ announcement.author.get_full_name|default:announcement.author.username }}</span>
                 </div>
-                <span>{{ announcement.created_at|date:"M d, Y g:i A" }}</span>
+                <div class="meta-actions">
+                    <span>{{ announcement.created_at|date:"M d, Y g:i A" }}</span>
+                    {% if is_privileged %}
+                        <a href="{% url 'announcement_edit' announcement.id %}">Edit</a>
+                        <form method="post" action="{% url 'announcement_delete' announcement.id %}" style="display:inline;" data-confirm="Delete this announcement?">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-danger" style="padding:6px 10px; border-radius:12px;">Delete</button>
+                        </form>
+                    {% endif %}
+                </div>
             </div>
         </div>
         {% endfor %}

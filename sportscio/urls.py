@@ -20,4 +20,10 @@ urlpatterns = [
     path("api/announcements/create/", views.create_announcement, name="create_announcement"),
     path("api/announcements/", views.get_announcements, name="get_announcements"),
     path("exec/new-event/", views.new_event_view, name="new_event"),
+    path("events/<int:event_id>/edit/", views.event_edit_view, name="event_edit"),
+    path("events/<int:event_id>/delete/", views.event_delete_view, name="event_delete"),
+    path("announcements/<int:announcement_id>/edit/", views.announcement_edit_view, name="announcement_edit"),
+    path("announcements/<int:announcement_id>/delete/", views.announcement_delete_view, name="announcement_delete"),
+    path("documents/<int:document_id>/edit/", views.document_edit_view, name="document_edit"),
+    path("documents/<int:document_id>/delete/", views.document_delete_view, name="document_delete"),
 ]
