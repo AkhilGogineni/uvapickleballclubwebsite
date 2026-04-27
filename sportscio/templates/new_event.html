@@ -46,6 +46,17 @@
             <input type="text" id="location" name="location" maxlength="200" placeholder="e.g. Mem Gym Court 2">
         </div>
         <div class="field">
+            <label for="event_type">Type</label>
+            <select id="event_type" name="event_type"
+                    style="width:100%; padding:12px 14px; border-radius:14px; border:1px solid rgba(81,118,100,0.35); font:inherit; background:var(--c-white);">
+                <option value="">—</option>
+                <option value="open_practice">Open practice</option>
+                <option value="team_practice">Club team practice</option>
+                <option value="social">Social event</option>
+                <option value="tournament">Tournament</option>
+            </select>
+        </div>
+        <div class="field">
             <label for="description">Description</label>
             <textarea id="description" name="description"></textarea>
         </div>

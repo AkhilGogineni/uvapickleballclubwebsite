@@ -40,6 +40,17 @@
       <input type="text" id="location" name="location" maxlength="200" value="{{ event.location }}" placeholder="e.g. Mem Gym Court 2">
     </div>
     <div class="field">
+      <label for="event_type">Type</label>
+      <select id="event_type" name="event_type"
+              style="width:100%; padding:12px 14px; border-radius:14px; border:1px solid rgba(81,118,100,0.35); font:inherit; background:var(--c-white);">
+        <option value="" {% if not event.event_type %}selected{% endif %}>—</option>
+        <option value="open_practice" {% if event.event_type == 'open_practice' %}selected{% endif %}>Open practice</option>
+        <option value="team_practice" {% if event.event_type == 'team_practice' %}selected{% endif %}>Club team practice</option>
+        <option value="social" {% if event.event_type == 'social' %}selected{% endif %}>Social event</option>
+        <option value="tournament" {% if event.event_type == 'tournament' %}selected{% endif %}>Tournament</option>
+      </select>
+    </div>
+    <div class="field">
       <label for="description">Description</label>
       <textarea id="description" name="description">{{ event.description }}</textarea>
     </div>
