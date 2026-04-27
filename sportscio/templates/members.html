@@ -12,10 +12,32 @@
 {% endif %}
 <div class="card" style="padding:16px 18px; margin-bottom:16px;">
     <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
-        <div style="flex:1; min-width:220px;">
+        <div style="flex:1; min-width:220px; max-width:520px;">
             <label for="member-search" class="muted" style="display:block; font-size:0.82rem; margin-bottom:6px;">Search members</label>
             <input id="member-search" type="text" placeholder="Start typing a name or email…" autocomplete="off"
                    style="width:100%; padding:10px 12px; border-radius:14px; border:1px solid rgba(81,118,100,0.25); font:inherit;">
+        </div>
+        <div style="position:relative; padding-top:18px;">
+            <button type="button" class="btn-secondary" id="role-filter-btn" aria-haspopup="dialog" aria-expanded="false" style="padding:10px 14px; border-radius:14px;">
+                Filter roles <span id="role-filter-count" class="pill pill-mint" style="margin-left:8px; display:none;">0</span>
+            </button>
+            <div id="role-filter-pop"
+                 style="display:none; position:absolute; right:0; top:54px; width:240px; background:var(--c-white); border:1px solid rgba(202,207,214,0.8); border-radius:16px; box-shadow: var(--shadow-soft); padding:12px 12px 10px; z-index:10;">
+                <div style="font-weight:800; color:var(--c-ink); margin-bottom:10px;">Show roles</div>
+                <label style="display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:12px; cursor:pointer;">
+                    <input type="checkbox" class="role-opt" value="member"> <span>Member</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:12px; cursor:pointer;">
+                    <input type="checkbox" class="role-opt" value="officer"> <span>Club leader</span>
+                </label>
+                <label style="display:flex; align-items:center; gap:10px; padding:8px 8px; border-radius:12px; cursor:pointer;">
+                    <input type="checkbox" class="role-opt" value="user_admin"> <span>User administrator</span>
+                </label>
+                <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:10px;">
+                    <button type="button" class="btn-secondary" id="role-filter-clear" style="padding:8px 12px; border-radius:12px;">Clear</button>
+                    <button type="button" class="btn-primary" id="role-filter-done" style="padding:8px 12px; border-radius:12px;">Done</button>
+                </div>
+            </div>
         </div>
         <div class="muted" style="font-size:0.9rem; white-space:nowrap; padding-top:18px;">
             <span id="member-count"></span>
@@ -36,7 +58,8 @@
             <tr class="member-row"
                 data-name="{{ u.get_full_name|default:u.username|lower }}"
                 data-email="{{ u.email|default:''|lower }}"
-                data-username="{{ u.username|lower }}">
+                data-username="{{ u.username|lower }}"
+                data-role="{% if u.profile %}{{ u.profile.role }}{% else %}{% endif %}">
                 <td style="display: flex; align-items: center; gap: 12px;">
                     {% if u.profile.avatar %}
                         <img src="{{ u.profile.avatar.url }}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
@@ -68,32 +91,79 @@
     const input = document.getElementById('member-search');
     const rows = Array.from(document.querySelectorAll('.member-row'));
     const countEl = document.getElementById('member-count');
-    if (!input || !countEl) return;
+    const roleBtn = document.getElementById('role-filter-btn');
+    const rolePop = document.getElementById('role-filter-pop');
+    const roleCount = document.getElementById('role-filter-count');
+    const clearBtn = document.getElementById('role-filter-clear');
+    const doneBtn = document.getElementById('role-filter-done');
+    const roleOpts = Array.from(document.querySelectorAll('.role-opt'));
+    if (!input || !countEl || !roleBtn || !rolePop || !roleCount || !clearBtn || !doneBtn) return;
 
     const setCount = (n) => { countEl.textContent = `${n} shown`; };
     const norm = (s) => (s || '').trim().toLowerCase();
+    const selectedRoles = new Set();
 
     function applyFilter() {
         const q = norm(input.value);
         let shown = 0;
         for (const r of rows) {
-            if (!q) {
-                r.style.display = '';
-                shown++;
-                continue;
-            }
+            const role = (r.dataset.role || '').trim();
+            const roleOk = selectedRoles.size === 0 || selectedRoles.has(role);
             const name = r.dataset.name || '';
             const email = r.dataset.email || '';
             const username = r.dataset.username || '';
-            const hit = name.startsWith(q) || email.startsWith(q) || username.startsWith(q);
+            const textOk = !q || name.startsWith(q) || email.startsWith(q) || username.startsWith(q);
+            const hit = roleOk && textOk;
             r.style.display = hit ? '' : 'none';
             if (hit) shown++;
         }
         setCount(shown);
     }
 
+    function openPop() {
+        rolePop.style.display = 'block';
+        roleBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closePop() {
+        rolePop.style.display = 'none';
+        roleBtn.setAttribute('aria-expanded', 'false');
+    }
+    function syncBadge() {
+        const n = selectedRoles.size;
+        roleCount.textContent = String(n);
+        roleCount.style.display = n ? 'inline-block' : 'none';
+    }
+
+    roleBtn.addEventListener('click', () => {
+        if (rolePop.style.display === 'block') closePop();
+        else openPop();
+    });
+    doneBtn.addEventListener('click', closePop);
+    clearBtn.addEventListener('click', () => {
+        selectedRoles.clear();
+        roleOpts.forEach(o => { o.checked = false; });
+        syncBadge();
+        applyFilter();
+        closePop();
+    });
+    roleOpts.forEach(o => {
+        o.addEventListener('change', () => {
+            if (o.checked) selectedRoles.add(o.value);
+            else selectedRoles.delete(o.value);
+            syncBadge();
+            applyFilter();
+        });
+    });
+    document.addEventListener('click', (e) => {
+        if (rolePop.style.display !== 'block') return;
+        if (e.target.closest('#role-filter-pop')) return;
+        if (e.target.closest('#role-filter-btn')) return;
+        closePop();
+    });
+
     input.addEventListener('input', applyFilter);
     setCount(rows.length);
+    syncBadge();
 })();
 </script>
 {% endblock %}
