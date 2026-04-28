@@ -161,20 +161,12 @@
         flex-direction: column;
         gap: 3px;
         min-height: 0;
-        overflow-y: auto;
-        overflow-x: hidden;
-    }
-    .cal-day-events::-webkit-scrollbar {
-        width: 8px;
-    }
-    .cal-day-events::-webkit-scrollbar-thumb {
-        background: rgba(81, 118, 100, 0.22);
-        border-radius: 999px;
+        overflow: hidden;
     }
     .cal-event {
         font-size: 0.68rem;
-        line-height: 1.25;
-        padding: 3px 5px;
+        line-height: 1.15;
+        padding: 2px 6px;
         border-radius: 6px;
         background: rgba(159, 216, 203, 0.55);
         color: var(--c-ink);
@@ -187,6 +179,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 6px;
+        height: 22px;
     }
     .cal-event .evt-main {
         min-width: 0;
@@ -194,6 +187,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         cursor: pointer;
+        flex: 1 1 auto;
     }
     .cal-event .evt-actions {
         display: none;
@@ -306,7 +300,7 @@
                      data-evt-type="{{ e.event_type|default:''|escape }}"
                      title="{{ e.title }} — {{ e.start_time|date:'M j, g:i A' }} to {{ e.end_time|date:'M j, g:i A' }}{% if e.location %} — {{ e.location }}{% endif %}{% if e.description %} — {{ e.description|truncatewords:20 }}{% endif %}">
                     <div class="evt-main" role="button" tabindex="0" aria-label="View event details">
-                        <span class="cal-event-time">{% if e.segment_start.date == e.segment_end.date %}{{ e.segment_start|date:"g:i A" }}–{{ e.segment_end|date:"g:i A" }}{% else %}{{ e.segment_start|date:"M j, g:i A" }} – {{ e.segment_end|date:"M j, g:i A" }}{% endif %}</span>{{ e.title|truncatechars:20 }}
+                        <span class="cal-event-time">{{ e.segment_start|date:"g:i A" }}</span>{{ e.title|truncatechars:24 }}
                     </div>
                     {% if is_privileged %}
                     <div class="evt-actions" aria-label="Event actions">
