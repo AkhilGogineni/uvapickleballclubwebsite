@@ -3,8 +3,8 @@
 {% block page_heading %}Welcome back, {{ user.first_name|default:user.username }}{% endblock %}
 {% block page_sub %}Here’s what’s happening with your club.{% endblock %}
 {% block content %}
-<div class="card-grid">
-    <div class="card" style="grid-column: 1 / -1;">
+<div class="card-grid card-grid--dashboard">
+    <div class="card card--dash-announcements">
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:8px;">
             <h2 style="margin:0;">Recent announcements</h2>
             <span class="pill pill-mint">Live</span>
@@ -23,7 +23,7 @@
         <p class="muted">No announcements yet.</p>
         {% endif %}
     </div>
-    <div class="card">
+    <div class="card card--dash-schedule">
         <h2>Upcoming schedule</h2>
         {% if events %}
         <ul class="list-rows">
@@ -42,7 +42,7 @@
         {% endif %}
         <a class="btn-secondary" href="{% url 'calendar' %}" style="margin-top:14px;">Open calendar</a>
     </div>
-    <div class="card">
+    <div class="card card--dash-quick">
         <h2>Quick links</h2>
         <p class="muted">Jump to club messaging, documents, and roster.</p>
         <div style="display:flex;flex-direction:column;gap:10px;margin-top:14px;">

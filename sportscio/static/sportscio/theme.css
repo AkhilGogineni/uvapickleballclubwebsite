@@ -202,6 +202,53 @@ body.theme-app {
   gap: 20px;
 }
 
+/* Home: announcements + schedule + quick links in one row on wide screens */
+.card-grid--dashboard {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(220px, 0.9fr);
+  align-items: stretch;
+}
+
+.card-grid--dashboard > .card {
+  min-width: 0;
+}
+
+.card-grid--dashboard .card--dash-announcements,
+.card-grid--dashboard .card--dash-schedule {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-grid--dashboard .card--dash-announcements .list-rows,
+.card-grid--dashboard .card--dash-schedule .list-rows {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.card-grid--dashboard .card--dash-announcements > .btn-secondary,
+.card-grid--dashboard .card--dash-schedule > .btn-secondary {
+  margin-top: auto;
+}
+
+@media (max-width: 1024px) {
+  .card-grid--dashboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .card-grid--dashboard .card--dash-quick {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .card-grid--dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .card-grid--dashboard .card--dash-quick {
+    grid-column: auto;
+  }
+}
+
 .card {
   background: var(--c-white);
   border-radius: var(--radius-xl);
