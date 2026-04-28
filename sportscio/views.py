@@ -341,7 +341,7 @@ def messages_view(request):
     return render(
         request,
         "messages.html",
-        {"messages": msgs, "nav_active": "messages", "chat_room": "general"},
+        {"chat_messages": msgs, "nav_active": "messages", "chat_room": "general"},
     )
 
 
@@ -354,7 +354,7 @@ def messages_admin_view(request):
     return render(
         request,
         "messages_admin.html",
-        {"messages": msgs, "nav_active": "messages_admin", "chat_room": "admin"},
+        {"chat_messages": msgs, "nav_active": "messages_admin", "chat_room": "admin"},
     )
 
 

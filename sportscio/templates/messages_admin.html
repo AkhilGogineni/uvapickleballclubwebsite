@@ -62,7 +62,7 @@
     </div>
     <div class="status-msg" id="status-message"></div>
     <div class="chat-scroll" id="message-list" aria-live="polite">
-        {% for message in messages %}
+        {% for message in chat_messages %}
         {% ifchanged message.timestamp|date:"Y-m-d" %}
         <div class="day-heading">{{ message.timestamp|chat_day_heading }}</div>
         {% endifchanged %}

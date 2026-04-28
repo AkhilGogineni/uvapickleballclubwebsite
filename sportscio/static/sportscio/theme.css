@@ -208,46 +208,6 @@ body.theme-app {
   flex: 1;
 }
 
-.flash-stack {
-  display: grid;
-  gap: 10px;
-  margin: 0 0 16px;
-}
-
-.flash {
-  padding: 12px 14px;
-  border-radius: 14px;
-  border: 1px solid rgba(81, 118, 100, 0.25);
-  background: rgba(159, 216, 203, 0.28);
-  color: var(--c-ink);
-  font-weight: 700;
-  box-shadow: var(--shadow-soft);
-  transition: opacity 0.35s ease, transform 0.35s ease;
-}
-
-.flash.hide {
-  opacity: 0;
-  transform: translateY(-6px);
-}
-
-.flash-success {
-  border-color: rgba(81, 118, 100, 0.35);
-  background: rgba(159, 216, 203, 0.35);
-}
-
-.flash-error,
-.flash-danger {
-  border-color: rgba(220, 38, 38, 0.35);
-  background: rgba(254, 202, 202, 0.55);
-  color: #7f1d1d;
-}
-
-.flash-warning {
-  border-color: rgba(234, 179, 8, 0.45);
-  background: rgba(254, 240, 138, 0.55);
-  color: #713f12;
-}
-
 .card-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

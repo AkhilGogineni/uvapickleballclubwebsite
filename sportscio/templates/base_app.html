@@ -83,13 +83,6 @@
             </div>
         </header>
         <main class="content-area">
-            {% if messages %}
-            <div class="flash-stack" id="flash-stack" aria-live="polite" aria-atomic="true">
-                {% for message in messages %}
-                <div class="flash flash-{{ message.tags|default:'info' }}" role="status">{{ message }}</div>
-                {% endfor %}
-            </div>
-            {% endif %}
             {% block content %}{% endblock %}
         </main>
     </div>
@@ -113,18 +106,6 @@
 {% block extra_js %}{% endblock %}
 <script>
 (() => {
-    // Auto-dismiss flash messages after ~5s
-    const flashStack = document.getElementById('flash-stack');
-    if (flashStack) {
-        const flashes = Array.from(flashStack.querySelectorAll('.flash'));
-        if (flashes.length) {
-            window.setTimeout(() => {
-                flashes.forEach((el) => el.classList.add('hide'));
-                window.setTimeout(() => { flashStack.remove(); }, 450);
-            }, 5200);
-        }
-    }
-
     const overlay = document.getElementById('confirm-overlay');
     const msg = document.getElementById('confirm-message');
     const noBtn = document.getElementById('confirm-no');
