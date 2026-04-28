@@ -13,6 +13,7 @@ import json
 from .models import ClubDocument, Message, Announcement, Event, Profile
 from .permissions import is_officer, is_user_admin, is_privileged
 
+#Django views, handles CRUD operations for events, announcements, documents, and user role management, calendar rendering
 
 def _parse_dt_local(value: str):
     """
@@ -139,7 +140,7 @@ def dashboard_view(request):
 def calendar_view(request):
     if is_user_admin(request.user):
         return redirect("user_role_admin")
-
+    #Get timezone conscious local month range with sanity checks
     today = timezone.localdate()
     try:
         y = int(request.GET.get("year", today.year))
@@ -162,13 +163,16 @@ def calendar_view(request):
         start_time__lte=end_dt,
         end_time__gte=start_dt,
     ).order_by("start_time")
-
+#build mapping of date, list of event segments for that date
     by_day = {}
     for e in events_qs:
+        #convert into times into local dates
         sd = timezone.localtime(e.start_time).date()
         ed = timezone.localtime(e.end_time).date()
+        #clip to calendar month range
         d = max(sd, first_day)
         end = min(ed, last_day)
+        #iterate from d to end, adding event chip for that day
         while d <= end:
             by_day.setdefault(d.isoformat(), []).append(_calendar_chip_for_day(e, d))
             d += timedelta(days=1)
