@@ -18,20 +18,10 @@
     .readonly-block { background: linear-gradient(180deg, rgba(214,229,227,0.4), rgba(202,207,214,0.2)); border-radius: 14px; padding: 14px 16px; margin-bottom: 12px; }
     .readonly-block .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: #6b7a72; margin-bottom: 4px; }
     .readonly-block .val { font-weight: 600; color: var(--c-ink); }
-    .msg-list { list-style: none; padding: 0; margin: 0 0 18px; }
-    .msg-list li { padding: 10px 14px; border-radius: 12px; margin-bottom: 8px; background: rgba(159, 216, 203, 0.35); border: 1px solid rgba(81,118,100,0.25); font-size: 0.92rem; }
 </style>
 {% endblock %}
 
 {% block content %}
-{% if messages %}
-<ul class="msg-list">
-    {% for message in messages %}
-    <li>{{ message }}</li>
-    {% endfor %}
-</ul>
-{% endif %}
-
 <form method="post" action="{% url 'profile_settings' %}" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="settings-grid">
