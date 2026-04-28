@@ -26,6 +26,15 @@ body.theme-app {
   color: var(--c-ink);
 }
 
+/* Prevent long URLs/words from overflowing cards */
+.card,
+.announcement-card,
+.list-rows li,
+.list-rows li * {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 .app-shell {
   display: flex;
   min-height: 100vh;
@@ -122,6 +131,9 @@ body.theme-app {
   margin: 6px 0 0;
   font-size: 0.95rem;
   color: #4a5a52;
+}
+.top-bar .sub:empty {
+  display: none;
 }
 
 .top-bar-actions {

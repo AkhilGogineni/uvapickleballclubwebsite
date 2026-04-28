@@ -1,7 +1,7 @@
 {% extends "base_app.html" %}
 {% block title %}Calendar | SportsCIO{% endblock %}
 {% block page_heading %}Calendar{% endblock %}
-{% block page_sub %}Month view — practices, games, and club events.{% endblock %}
+{% block page_sub %}{% endblock %}
 {% block extra_css %}
 <style>
     .cal-toolbar {
@@ -255,7 +255,6 @@
         </form>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-        <p class="muted" style="margin:0;">{% if is_privileged %}Click <strong>Create event</strong> to add to the grid.{% else %}View-only — club leaders add events.{% endif %}</p>
         {% if is_privileged %}
         <a class="btn-primary" href="{% url 'new_event' %}">Create event</a>
         {% endif %}
