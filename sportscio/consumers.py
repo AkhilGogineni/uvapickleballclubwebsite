@@ -1,3 +1,6 @@
+# AI Use: Generated with Gemini 3 Flash on 2026-03-25.
+# Prompt: "Write an AsyncWebsocketConsumer for a chat room and a separate consumer for broadcasting announcements using Django Channels".
+# Notes: Handles real-time communication logic, including database persistence for messages using database_sync_to_async.
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async

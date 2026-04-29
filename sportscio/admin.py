@@ -1,3 +1,6 @@
+# AI Use: Generated with Gemini 3 Flash on 2026-04-24.
+# Prompt: "Create a Django admin.py file to manage Profile, ClubDocument, Message, and Announcement models with search filters and custom fieldsets".
+# Notes: Configures the backend interface for model management and includes a save_model override for Announcements.
 from django.contrib import admin
 from .models import ClubDocument, Profile, Message, Announcement
 

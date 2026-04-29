@@ -1,3 +1,7 @@
+# AI Use: Generated with Gemini 3 Flash on 2026-04-20.
+# Prompt: "Write signals to auto-create profiles for new users and send mass emails using Googe SMTP for background tasks when an Announcement or Event is created".
+# Notes: Includes logic for unique username generation during social signups and offloads email sending to an asynchronous worker.
+
 import os
 from datetime import datetime
 from django.conf import settings

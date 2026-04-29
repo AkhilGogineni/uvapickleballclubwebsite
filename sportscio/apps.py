@@ -1,3 +1,4 @@
+# Description: Application configuration for the Sportscio Django app.
 from django.apps import AppConfig
 
 class SportscioConfig(AppConfig):

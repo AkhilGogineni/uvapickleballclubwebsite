@@ -1,3 +1,5 @@
+# Description: URL routing for the Sportscio Django app, mapping URL patterns to corresponding view functions for handling requests related to user profiles, events, announcements, and administrative actions.
+
 from django.urls import path
 from . import views
 

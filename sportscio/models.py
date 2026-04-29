@@ -1,3 +1,7 @@
+# AI Use: Generated with Gemini 3 Flash on 2026-04-01.
+# Prompt: "Define Django models for Profile, Message, Announcement, ClubDocument, and Event with appropriate foreign keys and choices".
+# Notes: Establishes the core data structure including user roles, S3-ready image fields, and timestamped messaging.
+
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone

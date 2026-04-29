@@ -1,3 +1,7 @@
+# AI Use: Generated with Gemini 3 Flash on 2026-04-17.
+# Prompt: "Configure Django settings for a production-ready app with AWS S3 storage, Gmail SMTP email, Django Channels for WebSockets, and role-based access control middleware".
+# Notes: This settings file is tailored for deployment on Heroku, with environment variable configurations for sensitive information and production optimizations like WhiteNoise for static file handling. It also includes setup for Django Q and Channels, as well as context processors and middleware for user role management.
+
 """
 Django settings for mysite project.
 

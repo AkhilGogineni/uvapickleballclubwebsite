@@ -1,9 +1,10 @@
+# Description: Unit tests for user role management functionality in the Sportscio Django app, ensuring that User Admins can only manage roles as specified and are restricted from accessing profile settings.
+
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.urls import reverse
 
 from .models import Profile
-
 
 class UserAdministratorRoleManagementTests(TestCase):
     def setUp(self):

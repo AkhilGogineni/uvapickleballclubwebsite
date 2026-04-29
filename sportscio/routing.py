@@ -1,3 +1,5 @@
+# Description: WebSocket routing for the Sportscio Django app, defining URL patterns for real-time chat and announcement features using Django Channels.
+
 from django.urls import re_path
 from . import consumers
 
