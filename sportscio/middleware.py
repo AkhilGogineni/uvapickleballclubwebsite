@@ -1,5 +1,5 @@
 # AI Use: Generated with Gemini 3 Flash on 2026-03-20.
-# Prompt: "Write a Django middleware that restricts users with the 'user_admin' role to specific URL prefixes, redirecting them otherwise".
+# Prompt: "How do I restrict specific Django roles like "user_admin" to particular URL prefixes?"
 # Notes: Implements a security layer to ensure User Admins only access role management as per course requirements.
 
 from django.shortcuts import redirect

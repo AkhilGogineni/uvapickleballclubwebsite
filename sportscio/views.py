@@ -1,5 +1,4 @@
-# AI Use: Generated with Gemini 3 Flash on 2026-04-25.
-# Prompt: "Create Django views for a club dashboard, calendar, document management, and profile settings, including role-based access control and custom date parsing".
+# AI Prompt: "How do I limit view compatibility based on user identity through authentication?"
 # Notes: Handles complex logic for rendering a monthly calendar grid and implements restrictions to redirect 'user_admin' roles to their specific dashboard.
 
 from django.contrib.auth.decorators import login_required, user_passes_test

@@ -1,5 +1,5 @@
 # AI Use: Generated with Gemini 3 Flash on 2026-03-20.
-# Prompt: "Create a Django context processor to make user profile roles and privileged status available globally in templates".
+# Prompt: "Configure Django context processor so user profile roles and privileged status are available globally in templates".
 # Notes: Provides boolean flags like is_officer and is_user_admin to all frontend templates.
 
 from .models import Profile
