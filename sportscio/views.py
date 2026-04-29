@@ -121,13 +121,11 @@ def dashboard_view(request):
     if is_user_admin(request.user):
         return redirect("user_role_admin") # redirect user_admins to their specific dashboard instead of general one
 
-    announcements = Announcement.objects.filter(is_active=True).order_by("-created_at")[:5]
+    announcements = Announcement.objects.filter(is_active=True).order_by("-created_at")[:3]
     now = timezone.now()
     events = (
-        Event.objects.filter(start_time__gte=now).order_by("start_time")[:6]
+        Event.objects.filter(start_time__gte=now).order_by("start_time")[:3]
     )
-    if events.count() < 3:
-        events = Event.objects.order_by("start_time")[:6]
 
     return render(
         request,
