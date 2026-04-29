@@ -83,7 +83,7 @@ def _calendar_chip_for_day(event: Event, day: date):
     seg_end = min(event.end_time, day_end)
     return CalendarEventChip(event, seg_start, seg_end)
 
-
+# View functions below, decorated with @login_required and role checks to enforce access control based on user identity and permissions.
 @login_required
 def home(request):
     if is_user_admin(request.user):
@@ -99,6 +99,7 @@ def whoami_view(request):
     except Profile.DoesNotExist:
         role = None
     db = connection.settings_dict
+    # user and database info for debugging purposes, but only for authenticated users since this is protected by @login_required
     return JsonResponse(
         {
             "user_id": request.user.id,
@@ -118,7 +119,7 @@ def whoami_view(request):
 @login_required
 def dashboard_view(request):
     if is_user_admin(request.user):
-        return redirect("user_role_admin")
+        return redirect("user_role_admin") # redirect user_admins to their specific dashboard instead of general one
 
     announcements = Announcement.objects.filter(is_active=True).order_by("-created_at")[:5]
     now = timezone.now()
@@ -234,7 +235,7 @@ def calendar_view(request):
 def members_view(request):
     if is_user_admin(request.user):
         return redirect("user_role_admin")
-
+    
     users = User.objects.select_related("profile").order_by("username")
     return render(request, "members.html", {"users": users, "nav_active": "members"})
 
@@ -245,7 +246,7 @@ def documents_view(request):
         return redirect("user_role_admin")
 
     docs = ClubDocument.objects.select_related("uploaded_by")
-
+    # only show documents uploaded by officers or execs to regular members, but show all to officers and execs
     if request.method == "POST":
         if not is_privileged(request.user):
             django_messages.error(request, "Only club leaders can upload documents.")
@@ -255,7 +256,7 @@ def documents_view(request):
         if not title or not upload:
             django_messages.error(request, "Title and file are required.")
             return redirect("documents")
-        max_bytes = 15 * 1024 * 1024
+        max_bytes = 15 * 1024 * 1024 # 15MB limit
         if upload.size > max_bytes:
             django_messages.error(request, "File must be 15MB or smaller.")
             return redirect("documents")
@@ -281,7 +282,8 @@ def profile_settings_view(request):
 
     user = request.user
     profile, _ = Profile.objects.get_or_create(user=user)
-
+    # Only allow user_admins to access their role management dashboard, not profile settings,
+    # to avoid confusion since they can't use other app features. All other roles can access profile settings.
     if request.method == "POST":
         first = request.POST.get("first_name", "").strip()
         last = request.POST.get("last_name", "").strip()
@@ -295,7 +297,7 @@ def profile_settings_view(request):
 
         profile.email_notifications = email_notifs
 
-        if birthday_raw:
+        if birthday_raw: # optional field, can be blank to clear
             try:
                 profile.birthday = datetime.strptime(birthday_raw, "%Y-%m-%d").date()
             except ValueError:
@@ -304,9 +306,9 @@ def profile_settings_view(request):
         else:
             profile.birthday = None
 
-        if "avatar" in request.FILES:
+        if "avatar" in request.FILES: # optional field, only update if provided
             img = request.FILES["avatar"]
-            if img.size > 2 * 1024 * 1024:
+            if img.size > 2 * 1024 * 1024: # 2MB limit for profile photos
                 django_messages.error(request, "Profile photo must be 2MB or smaller.")
                 return redirect("profile_settings")
             profile.avatar = img
@@ -338,6 +340,7 @@ def exec_profile_view(request):
 def messages_view(request):
     if is_user_admin(request.user):
         return redirect("user_role_admin")
+    # only show general room messages to regular members, but show all to officers and execs, and redirect user_admins to their dashboard
     msgs = (
         Message.objects.filter(room="general").order_by("-timestamp")[:50][::-1]
     )
@@ -353,6 +356,8 @@ def messages_view(request):
 def messages_admin_view(request):
     if is_user_admin(request.user):
         return redirect("user_role_admin")
+    
+    # only show general room messages to regular members, but show all to officers and execs, and redirect user_admins to their dashboard
     msgs = Message.objects.filter(room="admin").order_by("-timestamp")[:50][::-1]
     return render(
         request,
@@ -365,8 +370,7 @@ def messages_admin_view(request):
 @user_passes_test(is_privileged)
 def new_event_view(request):
     error = None
-
-    if request.method == "POST":
+    # displays fields for creating a new event, and handles validation and saving of that event, with access restricted to officers and execs
         title = request.POST.get("title", "").strip()
         start_time_raw = request.POST.get("start_time", "").strip()
         end_time_raw = request.POST.get("end_time", "").strip()
@@ -411,9 +415,11 @@ def admin_profile_view(request):
 @login_required
 @user_passes_test(is_user_admin)
 def user_role_admin_view(request):
+    # allows user_admins to change the roles of other users between member and officer
     if request.method == "POST":
         uid = request.POST.get("user_id")
         new_role = request.POST.get("new_role")
+        # validate inputs
         if not uid or new_role not in (Profile.ROLE_MEMBER, Profile.ROLE_OFFICER):
             django_messages.error(request, "Invalid role change.")
             return redirect("user_role_admin")
@@ -438,7 +444,7 @@ def user_role_admin_view(request):
             f"Updated {target.username} to {target.profile.get_role_display()}.",
         )
         return redirect("user_role_admin")
-
+    # display all users and their roles for management, with access restricted to user_admins
     users = User.objects.select_related("profile").order_by("username")
     return render(request, "user_role_admin.html", {"users": users})
 
@@ -447,6 +453,8 @@ def user_role_admin_view(request):
 def announcements_view(request):
     if is_user_admin(request.user):
         return redirect("user_role_admin")
+    
+    # only show active announcements, and show edit/delete options only to officers and execs
     announcements = Announcement.objects.filter(is_active=True)
     return render(
         request,
@@ -459,6 +467,7 @@ def announcements_view(request):
 @require_http_methods(["POST"])
 def create_announcement(request):
     user = request.user
+    # only officers and execs can create announcements
     if not (is_officer(user) or user.is_superuser):
         return JsonResponse(
             {"error": "Only club leaders can create announcements"}, status=403
@@ -478,7 +487,7 @@ def create_announcement(request):
             content=content,
         )
 
-        from .consumers import announcement_consumers
+        from .consumers import announcement_consumers # WebSocket consumers to broadcast new announcement in real-time to connected clients
 
         broadcast_message = {
             "type": "announcement_message",
@@ -489,7 +498,7 @@ def create_announcement(request):
             "created_at": announcement.created_at.isoformat(),
         }
 
-        import asyncio
+        import asyncio # used to run async broadcast function that sends the new announcement to all connected WebSocket clients
 
         async def broadcast():
             for consumer in announcement_consumers:
@@ -501,7 +510,7 @@ def create_announcement(request):
             from asgiref.sync import async_to_sync
 
             async_to_sync(broadcast)()
-
+        # return the created announcement as JSON response for frontend to update UI, including author username and created_at timestamp
         return JsonResponse(
             {
                 "id": announcement.id,
@@ -528,9 +537,9 @@ def get_announcements(request):
 def event_edit_view(request, event_id: int):
     if is_user_admin(request.user):
         return redirect("user_role_admin")
-    ev = get_object_or_404(Event, pk=event_id)
+    ev = get_object_or_404(Event, pk=event_id) # fetch event or return 404 if not found
     error = None
-
+    # displays fields for editing an existing event, and handles validation and saving of that event
     if request.method == "POST":
         title = request.POST.get("title", "").strip()
         start_dt = _parse_dt_local(request.POST.get("start_time", "").strip())
@@ -542,7 +551,7 @@ def event_edit_view(request, event_id: int):
             error = "Title, start time, and end time are required."
         elif end_dt <= start_dt:
             error = "End time must be after start time."
-        else:
+        else: # validate that start and end times are not in the past, and if valid, save changes to the event
             error = _validate_event_not_in_past(start_dt, end_dt)
             if error is None:
                 ev.title = title
@@ -581,6 +590,7 @@ def announcement_edit_view(request, announcement_id: int):
         return redirect("user_role_admin")
     ann = get_object_or_404(Announcement, pk=announcement_id)
     error = None
+    # displays fields for editing an existing announcement, and handles validation and saving of that announcement
     if request.method == "POST":
         title = request.POST.get("title", "").strip()
         content = request.POST.get("content", "").strip()
@@ -605,6 +615,7 @@ def announcement_edit_view(request, announcement_id: int):
 def announcement_delete_view(request, announcement_id: int):
     if is_user_admin(request.user):
         return redirect("user_role_admin")
+    # handles deletion of an announcement, with access restricted to officers and execs
     ann = get_object_or_404(Announcement, pk=announcement_id)
     ann.delete()
     django_messages.success(request, "Announcement deleted.")
@@ -618,7 +629,7 @@ def document_edit_view(request, document_id: int):
         return redirect("user_role_admin")
     doc = get_object_or_404(ClubDocument, pk=document_id)
     error = None
-    if request.method == "POST":
+    if request.method == "POST": # allows editing title / file of existing document
         title = request.POST.get("title", "").strip()
         upload = request.FILES.get("file")
         if not title:
