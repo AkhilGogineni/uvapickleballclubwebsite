@@ -158,12 +158,10 @@
             if (data.error) {
                 messageDiv.className = 'alert alert-error';
                 messageDiv.textContent = data.error;
+                messageDiv.style.display = 'block';
             } else {
-                messageDiv.className = 'alert alert-success';
-                messageDiv.textContent = 'Published!';
-                document.getElementById('announcement-form').reset();
+                window.location.reload();
             }
-            messageDiv.style.display = 'block';
         });
     });
     {% endif %}
