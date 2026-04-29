@@ -371,6 +371,7 @@ def messages_admin_view(request):
 def new_event_view(request):
     error = None
     # displays fields for creating a new event, and handles validation and saving of that event, with access restricted to officers and execs
+    if request.method == "POST":
         title = request.POST.get("title", "").strip()
         start_time_raw = request.POST.get("start_time", "").strip()
         end_time_raw = request.POST.get("end_time", "").strip()
